@@ -1,0 +1,3 @@
+version 1.1:
+- rewrote parser registration. Now the only place to modify in order to add new parser is main()
+- added help message if no xml config is provided

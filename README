@@ -1,0 +1,83 @@
+README for StandingsBuilder v1.1
+===========
+
+This is program for building standings for ACM contests from different sources 
+like other standings or logs of contests. The result of work is HTML file with
+merged standings
+
+The program requires libxml2 and libcurl in order to work properly. In case you
+use Ubuntu it is enough to use any of these command:
+
+     sudo apt-get install libxml2-dev libcurl4-openssl-dev
+     sudo apt-get install libxml2-dev libcurl4-gnutls-dev
+     sudo apt-get install libxml2-dev libcurl4-nss-dev
+
+Program requires XML config of the following form (case sensitive):
+
+    <Builder>
+      <ProblemCount>11</ProblemCount>
+      <Timeout>300</Timeout>
+      <OutputFile>output.html</OutputFile>
+      <Parsers>
+        ...List of parsers to use...
+      </Parsers>
+    </Builder>
+
+ProblemCount is number of problems in current contest
+Timeout is delay in seconds, after which output file will be rewritten
+OutputFile is path to file, where the result of program will be written
+
+Parsers should contain list of parsers (programs, that fetch information and
+place it into log). Currently supported parsers:
+
+ > EjudgeLinkParser
+     Necessary attribute: [URL]
+     Optional attribute: [Timeless]=No/Yes
+     Downloads Ejudge standings from [URL], parses it and puts teams in it into 
+     resulting standing. If [Timeless] is true, then there will be no attempts
+     to wetch time of submissions
+     Provides time.
+ > EjudgeFileParser
+     Necessary attribute: [Path]
+     Optional attribute: [Timeless]=No/Yes
+     Same as EjudgeLinkParser, but instead of downloading opens local file
+     Provides time.
+ > NEERCXmlParser
+     Necessary attribute: [XMLPath]
+     Parses NEERC contests history pack and unrolles by simulating attempts from
+     it.
+ > NEERCHtmlParser
+     Necessary attribute: [Path]
+     Optional attribute: [HideUnsolved]=No/Yes
+     Reads final standings of NEERC contest in HTML format and attempts to
+     simulate it. It is unknown, when were wrong attempts made, so for problems 
+     that were accepted all wrong attempts were made simultaneously with 
+     accepted one. If problem wasn't solved, all attempts will be shown at start
+     or won't be shown at all depending on [HideUnsolved]
+
+To run the program first argument of program must be XML config. If none 
+provided will be shown help message
+
+Every parser may have additional parameter [Style] that highlights rows, 
+provided by this parser in different colors:
+  0 - (default value) transparent
+  1 - yellow
+  2 - orange
+  3 - pink
+  4 - silver
+
+The example of configuration file:
+
+  <Builder>
+    <ProblemCount>13</ProblemCount>
+    <Timeout>300</Timeout>
+    <OutputFile>/tmp/output.html</OutputFile>
+    <Parsers>
+      <EjudgeLinkParser URL="http://ejudge.crimea.edu/2014/simf1/standings114.html"/>
+      <EjudgeLinkParser URL="http://olimp.vntu.edu.ua/standings-lviv.php" Style="1"/>
+      <EjudgeLinkParser URL="http://acm.khnu.km.ua/result07.php" Style="2"/>
+      <EjudgeLinkParser URL="http://olimp.vntu.edu.ua/standings-kyiv.php" Style="3"/>
+      <EjudgeLinkParser URL="http://ejudge.inform.snu.edu.ua/ejudge/standings5.html" Style="4" Timeless="yes"/>
+    </Parsers>
+  </Builder>
+
