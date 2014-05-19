@@ -31,17 +31,17 @@ Parsers should contain list of parsers (programs, that fetch information and
 place it into log). Currently supported parsers:
 
  > EjudgeLinkParser
+     _Provides time_
      Necessary attribute: [URL]
      Optional attribute: [Timeless]=No/Yes
      Downloads Ejudge standings from [URL], parses it and puts teams in it into 
      resulting standing. If [Timeless] is true, then there will be no attempts
      to wetch time of submissions
-     Provides time.
  > EjudgeFileParser
+     _Provides time_
      Necessary attribute: [Path]
      Optional attribute: [Timeless]=No/Yes
      Same as EjudgeLinkParser, but instead of downloading opens local file
-     Provides time.
  > NEERCXmlParser
      Necessary attribute: [XMLPath]
      Parses NEERC contests history pack and unrolles by simulating attempts from
@@ -54,6 +54,11 @@ place it into log). Currently supported parsers:
      that were accepted all wrong attempts were made simultaneously with 
      accepted one. If problem wasn't solved, all attempts will be shown at start
      or won't be shown at all depending on [HideUnsolved]
+ > Timer
+     _Provides time_
+     Necessary attribute: [StartTime]
+     Doesn't really parses anything or affects standings directly. It's only 
+     purpose is to count time from the start.
 
 To run the program first argument of program must be XML config. If none 
 provided will be shown help message
@@ -68,16 +73,13 @@ provided by this parser in different colors:
 
 The example of configuration file:
 
-  <Builder>
-    <ProblemCount>13</ProblemCount>
-    <Timeout>300</Timeout>
-    <OutputFile>/tmp/output.html</OutputFile>
-    <Parsers>
-      <EjudgeLinkParser URL="http://ejudge.crimea.edu/2014/simf1/standings114.html"/>
-      <EjudgeLinkParser URL="http://olimp.vntu.edu.ua/standings-lviv.php" Style="1"/>
-      <EjudgeLinkParser URL="http://acm.khnu.km.ua/result07.php" Style="2"/>
-      <EjudgeLinkParser URL="http://olimp.vntu.edu.ua/standings-kyiv.php" Style="3"/>
-      <EjudgeLinkParser URL="http://ejudge.inform.snu.edu.ua/ejudge/standings5.html" Style="4" Timeless="yes"/>
-    </Parsers>
-  </Builder>
+ <Builder>
+   <ProblemCount>11</ProblemCount>
+   <Timeout>300</Timeout>
+   <OutputFile>output.html</OutputFile>
+   <Parsers>
+     <Timer StartTime="00:00"/>
+     <NEERCXmlParser XMLPath="standings.xml" Style="1"/>
+   </Parsers>
+ </Builder>
 

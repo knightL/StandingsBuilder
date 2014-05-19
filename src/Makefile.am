@@ -28,7 +28,9 @@ standingsbuilder_SOURCES = Contest.cpp \
                             Parsers/NEERCXmlParser.cpp\
                             Parsers/NEERCXmlParser.h\
                             Parsers/NEERCHtmlParser.cpp\
-                            Parsers/NEERCHtmlParser.h
+                            Parsers/NEERCHtmlParser.h\
+                            Parsers/Timer.cpp\
+                            Parsers/Timer.h
 INCLUDES = @standingsbuilder_CFLAGS@
 standingsbuilder_LDADD = @standingsbuilder_LIBS@
 

@@ -12,6 +12,7 @@
 #include "Parsers/EjudgeFileParser.h"
 #include "Parsers/NEERCXmlParser.h"
 #include "Parsers/NEERCHtmlParser.h"
+#include "Parsers/Timer.h"
 
 int main(int argc, char** argv)
 {
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
 	unroller->registerParser<EjudgeFileParser>();
 	unroller->registerParser<NEERCXmlParser>();
 	unroller->registerParser<NEERCHtmlParser>();
+	unroller->registerParser<Timer>();
 	unroller->init(argc,argv);
 	unroller->run();
 }
