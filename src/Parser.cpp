@@ -1,14 +1,14 @@
 /*
  * Parser.cpp
  *
- *  Created on: 26 апр. 2014
  *      Author: knightl
  */
 
 #include "Parser.h"
 #include <cstdlib>
 
-Parser::Parser(const XMLParser& config, xmlNodePtr start):curtime(-1) {
+Parser::Parser(const XMLParser& config, xmlNodePtr start):curtime(0) {
+	// if in XML config present information about style for parser, store it
 	xmlNodePtr ptr=(xmlNodePtr)config.findAttribute(start->properties,"Style");
 	if(!ptr)
 		style=0;

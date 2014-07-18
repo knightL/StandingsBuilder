@@ -1,7 +1,6 @@
 /*
  * NEERCXmlParser.cpp
  *
- *  Created on: 26 апр. 2014
  *      Author: knightl
  */
 
@@ -27,9 +26,11 @@ bool NEERCXmlParser::Event::operator<(const Event& ev) const
 
 
 NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser(config,start) {
-	start=(xmlNodePtr)config.findAttribute(start->properties,"XMLPath");
+	// Get XML file path from config and open it
+
+	start=(xmlNodePtr)config.findAttribute(start->properties,"Path");
 	if(!start)
-		printf("NEERCXmlParser: Missing property \"XMLPath\"\n");
+		printf("NEERCXmlParser: Missing property \"Path\"\n");
 	else
 	{
 		string path=(char*)xmlNodeGetContent(start);
@@ -41,6 +42,7 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser
 			printf("Failed to parse file %s\n",path.c_str());
 			exit(1);
 		}
+		// go down XML tree
 		root=xmlDocGetRootElement(doc);
 		assert(root!=NULL);
 		cur=xmlFirstElementChild(root);
@@ -48,16 +50,20 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser
 		cur=xmlFirstElementChild(cur);
 		for(;cur;cur=xmlNextElementSibling(cur))
 		{
+			// for each team
 			if(!strcmp( (char*)cur->name, "session" ))
 			{
 				string name="";
+				// find team's name
 				xmlAttrPtr attr=cur->properties;
 				for(; attr; attr=attr->next)
 					if( !strcmp( (char*)attr->name, "party") )
 						name=(char*)xmlNodeGetContent((xmlNode*)attr);
+				// for each problem
 				xmlNode* problems=xmlFirstElementChild(cur);
 				for(;problems; problems= xmlNextElementSibling(problems))
 				{
+					// get problem id
 					attr=problems->properties;
 					int id=-1;
 					for(; attr; attr=attr->next)
@@ -67,6 +73,7 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser
 							id=buf[0]-'A';
 						}
 					assert(id>=0);
+					// store all submission
 					xmlNode* runs=xmlFirstElementChild(problems);
 					for(; runs; runs= xmlNextElementSibling(runs))
 					{
@@ -112,12 +119,15 @@ void NEERCXmlParser::update()
 
 void NEERCXmlParser::updateContest(Contest* contest, int time)
 {
+	// process all events before (time)
 	while( !event.empty() && event.back().time/1000/60<=time)
 	{
+		// extract team, make an attempt and put it back
 		pTeam team = contest->extract_team(event.back().team) ;
 		team->make_attempt(event.back().time/1000/60, event.back().id, event.back().accepted);
 		team->set_type(style);
 		contest->add_team(team);
+
 		event.pop_back();
 	}
 }
@@ -134,6 +144,11 @@ std::string NEERCXmlParser::getName()
 
 std::string NEERCXmlParser::getDescription()
 {
-	return "Necessary attributes:\n\
-<XMLPath> - path to xml file with neerc standings";
+	return "Necessary attributes:\n"
+		   "<Path> - path to xml file with neerc standings"
+#ifdef HAVE_LIBCURL
+		   "\n or\n"
+		   "<URL> - link to xml file"
+#endif 
+;
 }

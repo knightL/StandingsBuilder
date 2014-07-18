@@ -1,22 +1,19 @@
-README for StandingsBuilder v1.1
+README for StandingsBuilder v1.2
 ===========
 
-This is program for building standings for ACM contests from different sources 
-like other standings or logs of contests. The result of work is HTML file with
-merged standings
+This is program for building standings for ACM contests from different sources like other standings or logs of contests. The result of work is HTML file with merged standings
 
-The program requires libxml2 and libcurl in order to work properly. In case you
-use Ubuntu it is enough to use any of these command:
+The program requires libxml2 in order to work properly. Also it is recommended to have libcurl installed, so program will be able to download files from internet. If you don't want this, you can run configuration script as follows:
 
-     sudo apt-get install libxml2-dev libcurl4-openssl-dev
-     sudo apt-get install libxml2-dev libcurl4-gnutls-dev
-     sudo apt-get install libxml2-dev libcurl4-nss-dev
+	./configure --without-libcurl
+
+ In case you use Ubuntu to install libxml2 you should install package with name libxml2-dev. To install libcurl, you may install either of 3 packages: libcurl4-openssl-dev, libcurl4-gnutls-dev or libcurl4-nss-dev.
 
 Program requires XML config of the following form (case sensitive):
 
     <Builder>
       <ProblemCount>11</ProblemCount>
-      <Timeout>300</Timeout>
+      <RefreshRate>300</RefrestRate>
       <OutputFile>output.html</OutputFile>
       <Parsers>
         ...List of parsers to use...
@@ -24,41 +21,32 @@ Program requires XML config of the following form (case sensitive):
     </Builder>
 
 ProblemCount is number of problems in current contest
-Timeout is delay in seconds, after which output file will be rewritten
+RefreshRate is delay in seconds, after which output file will be rewritten
 OutputFile is path to file, where the result of program will be written
 
 Parsers should contain list of parsers (programs, that fetch information and
 place it into log). Currently supported parsers:
 
- > EjudgeLinkParser
+ > EjudgeParser
      _Provides time_
-     Necessary attribute: [URL]
+     Necessary attribute: [Path] or [URL]
      Optional attribute: [Timeless]=No/Yes
-     Downloads Ejudge standings from [URL], parses it and puts teams in it into 
-     resulting standing. If [Timeless] is true, then there will be no attempts
-     to wetch time of submissions
- > EjudgeFileParser
-     _Provides time_
-     Necessary attribute: [Path]
-     Optional attribute: [Timeless]=No/Yes
-     Same as EjudgeLinkParser, but instead of downloading opens local file
+     Downloads Ejudge standings either on local computer from[Path] or by link [URL], parses it and puts teams in it into resulting standing. If [Timeless] is true, the parser will not attempt to get and store time of submissions
+
  > NEERCXmlParser
-     Necessary attribute: [XMLPath]
-     Parses NEERC contests history pack and unrolles by simulating attempts from
-     it.
+     Necessary attribute: [Path] or [URL]
+     Parses NEERC contests history pack and unrolles by simulating attempts from it.
+
  > NEERCHtmlParser
      Necessary attribute: [Path]
      Optional attribute: [HideUnsolved]=No/Yes
-     Reads final standings of NEERC contest in HTML format and attempts to
-     simulate it. It is unknown, when were wrong attempts made, so for problems 
-     that were accepted all wrong attempts were made simultaneously with 
-     accepted one. If problem wasn't solved, all attempts will be shown at start
-     or won't be shown at all depending on [HideUnsolved]
+     Reads final standings of NEERC contest in HTML format and attempts to simulate it. It is unknown, when were wrong attempts made, so for problems that were accepted all wrong attempts were made simultaneously with accepted one. If problem wasn't solved, all attempts will be shown at start or won't be shown at all depending on [HideUnsolved]
+
  > Timer
      _Provides time_
      Necessary attribute: [StartTime]
-     Doesn't really parses anything or affects standings directly. It's only 
-     purpose is to count time from the start.
+     Optional attribute: [StartDate]
+     Doesn't really parses anything or affects standings directly. It's only purpose is to count time from contest start. By default StartDate equals to present date. StartTime should be in format "hh:mm". Format for StartDate is "yyyy/mm/dd"
 
 To run the program first argument of program must be XML config. If none 
 provided will be shown help message
@@ -75,11 +63,11 @@ The example of configuration file:
 
  <Builder>
    <ProblemCount>11</ProblemCount>
-   <Timeout>300</Timeout>
+   <RefreshRate>300</RefreshRate>
    <OutputFile>output.html</OutputFile>
    <Parsers>
      <Timer StartTime="00:00"/>
-     <NEERCXmlParser XMLPath="standings.xml" Style="1"/>
+     <NEERCXmlParser Path="standings.xml" Style="1"/>
    </Parsers>
  </Builder>
 

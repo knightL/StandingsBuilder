@@ -1,7 +1,6 @@
 /*
  * NEERCHtmlParser.h
  *
- *  Created on: 13 мая 2014
  *      Author: knightl
  */
 
@@ -10,6 +9,7 @@
 
 #include "../Parser.h"
 
+// Parses HTML standings from NEERC format
 class NEERCHtmlParser: public Parser {
 	class Event {
 		int time;

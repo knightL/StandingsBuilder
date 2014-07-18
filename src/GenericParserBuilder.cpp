@@ -1,7 +1,6 @@
 /*
  * GenericParserBuilder.cpp
  *
- *  Created on: 13 мая 2014
  *      Author: knightl
  */
 

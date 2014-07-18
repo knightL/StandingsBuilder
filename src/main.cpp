@@ -1,29 +1,32 @@
 /*
  * main.cpp
  *
- *  Created on: 25 апр. 2014
  *      Author: knightl
  */
 
+#include "config.h"
+#ifdef HAVE_LIBCURL
 #include <curl/curl.h>
+#endif
 #include "Unroller.h"
 #include "GenericParserBuilder.h"
-#include "Parsers/EjudgeLinkParser.h"
-#include "Parsers/EjudgeFileParser.h"
+#include "Parsers/EjudgeParser.h"
 #include "Parsers/NEERCXmlParser.h"
 #include "Parsers/NEERCHtmlParser.h"
 #include "Parsers/Timer.h"
 
 int main(int argc, char** argv)
 {
-	curl_global_init(CURL_GLOBAL_ALL);
 	Unroller unroller;
-	unroller->registerParser<EjudgeLinkParser>();
-	unroller->registerParser<EjudgeFileParser>();
+
+	// Register all parsers here
+	unroller->registerParser<EjudgeParser>();
 	unroller->registerParser<NEERCXmlParser>();
 	unroller->registerParser<NEERCHtmlParser>();
 	unroller->registerParser<Timer>();
+
 	unroller->init(argc,argv);
+
 	unroller->run();
 }
 

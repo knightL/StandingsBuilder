@@ -1,7 +1,6 @@
 /*
  * Unroller.h
  *
- *  Created on: 25 апр. 2014
  *      Author: knightl
  */
 
@@ -10,7 +9,6 @@
 
 #include "Parser.h"
 #include "Contest.h"
-#include "Event.h"
 #include <vector>
 #include <string>
 #include <curl/curl.h>
@@ -23,7 +21,7 @@ class _Unroller {
 	int curtime;
 	std::vector<GenericParserBuilder*> builders;
 	std::vector<Parser*> parsers;
-	int timeout;
+	int refresh_rate;
 public:
 	Contest *contest;
 	_Unroller();

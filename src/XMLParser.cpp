@@ -1,62 +1,12 @@
 /*
  * XMLParser.cpp
  *
- *  Created on: 25 апр. 2014
  *      Author: knightl
  */
 
 #include "XMLParser.h"
-#include "libxml/HTMLparser.h"
 #include <cstring>
 
-XMLParser::XMLParser(char* buf) {
-	int top=0;
-	int len=strlen(buf);
-//	for(int i=0;i+1<len;i++)
-//	{
-//		if(buf[i]=='<' && buf[i+1]=='!')
-//		{
-//			buf[i]=buf[i+1]=' ';
-//			int j=i;
-//			while(j<len && buf[j]!='>')
-//			{
-//				buf[j]=' ';
-//				j++;
-//			}
-//			if(j<len)
-//				buf[j]=' ';
-//		}
-//	}
-	for(int i=0;i<len;i++)
-	{
-		if(!strncmp(&buf[i],"<html>",6))
-		{
-			top=i;
-			break;
-		}
-	}
-//	for(int i=top;i<len;i++)
-//	{
-//		if(buf[i]=='&')
-//		{
-//			int j;
-//			for(j=i;j<len && buf[j]!=';';j++)
-//				buf[j]=' ';
-//			buf[j]=' ';
-//		}
-//	}
-//	doc=xmlReadMemory(buf+top,len-top,NULL,NULL,0);
-	doc=(xmlDocPtr)htmlReadMemory(buf+top,len-top,NULL,NULL,0);
-	if(doc)
-	{
-		root=xmlDocGetRootElement(doc);
-	}
-	else
-	{
-		root=NULL;
-		printf("Failed to parse HTML\n");
-	}
-}
 
 XMLParser::XMLParser(xmlDocPtr doc)
 {
@@ -69,7 +19,7 @@ xmlNode* XMLParser::getRoot() const
 	return root;
 }
 
-xmlNode* XMLParser::getChild(xmlNode* cur) const
+xmlNode* XMLParser::getChild(xmlNodePtr cur) const
 {
 	if(!cur)
 	{
@@ -79,7 +29,7 @@ xmlNode* XMLParser::getChild(xmlNode* cur) const
 	return xmlFirstElementChild(cur);
 }
 
-xmlNode* XMLParser::getNext(xmlNode* cur) const
+xmlNode* XMLParser::getNext(xmlNodePtr cur) const
 {
 	if(!cur)
 	{
@@ -89,20 +39,30 @@ xmlNode* XMLParser::getNext(xmlNode* cur) const
 	return xmlNextElementSibling(cur);
 }
 
-xmlNode* XMLParser::findNode(xmlNode* start, std::string nodeName) const
+xmlNode* XMLParser::findNode(xmlNodePtr start, std::string nodeName) const
 {
 	while(start && strcmp(nodeName.c_str(), (char*) start->name))
 		start=getNext(start);
 	return start;
 }
 
-xmlAttr* XMLParser::findAttribute(xmlAttrPtr start, std::string AttrName) const
+xmlAttrPtr XMLParser::findAttribute(xmlAttrPtr start, std::string AttrName) const
 {
 	while(start && strcmp(AttrName.c_str(), (char*) start->name))
 		start=start->next;
 	return start;
 }
 
+bool XMLParser::haveAttribute(xmlNodePtr start, std::string attrName) const
+{
+	return findAttribute(start->properties, attrName)!=NULL;
+}
+
+xmlChar* XMLParser::getAttributeContent(xmlNodePtr start, std::string  attrName) const
+{
+	xmlAttrPtr ptr=findAttribute(start->properties, attrName);
+	return ptr? xmlNodeGetContent((xmlNodePtr)ptr): NULL;
+}
 
 XMLParser::~XMLParser()
 {

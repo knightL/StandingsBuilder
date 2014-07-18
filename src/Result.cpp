@@ -1,7 +1,6 @@
 /*
  * Result.cpp
  *
- *  Created on: 25 апр. 2014
  *      Author: knightl
  */
 

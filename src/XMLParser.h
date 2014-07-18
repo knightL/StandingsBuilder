@@ -1,7 +1,6 @@
 /*
  * XMLParser.h
  *
- *  Created on: 25 апр. 2014
  *      Author: knightl
  */
 
@@ -18,14 +17,15 @@ class XMLParser {
 	xmlDoc* doc;
 	xmlNode* root;
 public:
-	XMLParser(char* buf);
-	XMLParser(xmlDoc* doc);
+	XMLParser(xmlDocPtr doc);
 	~XMLParser();
 	xmlNode* getRoot() const;
-	xmlNode* getChild(xmlNode* cur) const;
-	xmlNode* getNext(xmlNode* cur) const;
-	xmlNode* findNode(xmlNode* start, std::string nodeName) const;
+	xmlNode* getChild(xmlNodePtr cur) const;
+	xmlNode* getNext(xmlNodePtr cur) const;
+	xmlNode* findNode(xmlNodePtr start, std::string nodeName) const;
 	xmlAttr* findAttribute(xmlAttrPtr start, std::string attrName ) const;
+	bool haveAttribute(xmlNodePtr start, std::string) const;
+	xmlChar* getAttributeContent(xmlNodePtr start, std::string) const;
 	void printTree(xmlNodePtr start, int depth=0) const;
 };
 

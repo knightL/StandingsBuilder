@@ -1,3 +1,10 @@
+version 1.2
+- merged EjudgeLinkParser and EjudgeFileParser into one EjudgeParser
+- rewritten Timer and added attribute
+- it is possible to compile project without libcurl, though the program will be unable to download files from internet
+- renamed Timeout property. Now it is called RefreshRate
+- now source contains some commentaries
+
 version 1.1:
 - rewrote parser registration. Now the only place to modify in order to add new parser is main()
 - added help message if no xml config is provided

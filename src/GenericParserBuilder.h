@@ -1,7 +1,6 @@
 /*
  * GenericParserBuilder.h
  *
- *  Created on: 13 мая 2014
  *      Author: knightl
  */
 
@@ -11,15 +10,20 @@
 #include "Parser.h"
 #include <string>
 
+// interface for class to build Parser
 class GenericParserBuilder {
 public:
 	GenericParserBuilder();
 	virtual ~GenericParserBuilder();
+	/**
+	 * Build parser from config
+	 **/
 	virtual Parser* build(const XMLParser& config, xmlNodePtr start)=0;
 	virtual std::string getName() const=0;
 	virtual std::string getDescription() const=0;
 };
 
+// template for class, which build Parser of ParserType class
 template<class ParserType>
 class ParserBuilder:GenericParserBuilder {
 public:

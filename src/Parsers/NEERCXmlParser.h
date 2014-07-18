@@ -1,7 +1,6 @@
 /*
  * NEERCXmlParser.h
  *
- *  Created on: 26 апр. 2014
  *      Author: knightl
  */
 
@@ -12,6 +11,7 @@
 #include "../XMLParser.h"
 #include <string>
 
+// Parses XML log in NEERC format
 class NEERCXmlParser: public Parser {
 	class Event {
 		int time;

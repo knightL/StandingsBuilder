@@ -1,7 +1,6 @@
 /*
  * EjudgeParser.h
  *
- *  Created on: 26 апр. 2014
  *      Author: knightl
  */
 
@@ -10,8 +9,9 @@
 
 #include "../Parser.h"
 #include "../XMLParser.h"
+#include "../FileReader.h"
 
-class EjudgeParser: public Parser {
+class EjudgeParser: public Parser, public FileReader {
 protected:
 	XMLParser *xml;
 	std::vector<std::string> teams;
@@ -19,8 +19,11 @@ protected:
 public:
 	EjudgeParser(const XMLParser& config, xmlNodePtr start);
 	virtual ~EjudgeParser();
+	virtual void update();
 	virtual void updateContest(Contest* contest, int time);
 	virtual bool providesTime();
+	static std::string getName();
+	static std::string getDescription();
 };
 
 #endif /* EJUDGEPARSER_H_ */
