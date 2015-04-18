@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([standingsbuilder], [1.2], [knightLA@yandex.ru])
+AC_INIT([standingsbuilder], [1.3], [knightLA@yandex.ru])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config.h])
@@ -23,6 +23,9 @@ AS_IF([test "x$with_libcurl" != "xno"],[
 PKG_CHECK_MODULES(libxml, libxml-2.0)
 AC_SUBST(libxml_CFLAGS)
 AC_SUBST(libxml_LIBS)
+PKG_CHECK_MODULES(lua5_2, lua5.2)
+AC_SUBST(lua5_2_CFLAGS)
+AC_SUBST(lua5_2_LIBS)
 
 # Checks for header files.
 

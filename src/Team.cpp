@@ -16,7 +16,7 @@ Team::Team(string name, int problem_cnt):
 	solved(problem_cnt),
 	time(problem_cnt)
 {
-	type=0;
+	type="";
 }
 
 void Team::make_attempt(int t, int id, bool accepted)
@@ -64,7 +64,7 @@ Result Team::get_result() const
 	return result;
 }
 
-void Team::set_type(int type)
+void Team::set_type(std::string type)
 {
 	this->type=type;
 }

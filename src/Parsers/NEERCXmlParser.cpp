@@ -11,6 +11,8 @@
 #include <algorithm>
 using namespace std;
 
+#include <iostream>
+
 NEERCXmlParser::Event::Event(int time, std::string team, int id, bool accepted):
 	time(time),
 	team(team),
@@ -58,7 +60,7 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser
 				xmlAttrPtr attr=cur->properties;
 				for(; attr; attr=attr->next)
 					if( !strcmp( (char*)attr->name, "party") )
-						name=(char*)xmlNodeGetContent((xmlNode*)attr);
+						name=prefix+string((char*)xmlNodeGetContent((xmlNode*)attr));
 				// for each problem
 				xmlNode* problems=xmlFirstElementChild(cur);
 				for(;problems; problems= xmlNextElementSibling(problems))

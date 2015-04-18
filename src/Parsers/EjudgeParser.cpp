@@ -99,7 +99,7 @@ void EjudgeParser::updateContest(Contest* contest, int)
 		if(atoi((char*)xmlNodeGetContent(col))==0) break;
 		col=xml->getNext(col);
 		// get team name and allocate place to store information about submission
-		url_guys.push_back((char*)xmlNodeGetContent(col));
+		url_guys.push_back(prefix+string((char*)xmlNodeGetContent(col)));
 		attempts.push_back(vector<int>(problem_count));
 		solved.push_back(vector<bool>(problem_count));
 		time.push_back(vector<int>(problem_count));
@@ -151,18 +151,18 @@ void EjudgeParser::updateContest(Contest* contest, int)
 	}
 	// remove all teams, that were added at previous step
 	for(int i=0;i<(int)this->teams.size();i++)
-		delete unroller->contest->extract_team(teams[i]);
+		delete contest->extract_team(teams[i]);
 	// put new teams into table
 	this->teams=url_guys;
 	for(int i=0;i<(int)this->teams.size();i++)
 	{
-		pTeam team=unroller->contest->extract_team(teams[i]);
+		pTeam team=contest->extract_team(teams[i]);
 		if(!timeless)
 			team->make_from_description(attempts[i],solved[i],time[i]);
 		else
 			team->make_form_timeless_description(attempts[i],solved[i],res[i]);
 		team->set_type(this->style);
-		unroller->contest->add_team(team);
+		contest->add_team(team);
 	}
 	delete xml;
 	xml=NULL;

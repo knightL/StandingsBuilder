@@ -68,11 +68,11 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_standingsbuilder_OBJECTS = Contest.$(OBJEXT) FileReader.$(OBJEXT) \
-	GenericParserBuilder.$(OBJEXT) main.$(OBJEXT) Parser.$(OBJEXT) \
-	Result.$(OBJEXT) Team.$(OBJEXT) Unroller.$(OBJEXT) \
-	XMLParser.$(OBJEXT) EjudgeParser.$(OBJEXT) \
-	NEERCXmlParser.$(OBJEXT) NEERCHtmlParser.$(OBJEXT) \
-	Timer.$(OBJEXT)
+	GenericParserBuilder.$(OBJEXT) luacontestlib.$(OBJEXT) \
+	main.$(OBJEXT) Parser.$(OBJEXT) Result.$(OBJEXT) \
+	Team.$(OBJEXT) Unroller.$(OBJEXT) XMLParser.$(OBJEXT) \
+	EjudgeParser.$(OBJEXT) NEERCXmlParser.$(OBJEXT) \
+	NEERCHtmlParser.$(OBJEXT) Timer.$(OBJEXT)
 standingsbuilder_OBJECTS = $(am_standingsbuilder_OBJECTS)
 standingsbuilder_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
@@ -194,6 +194,8 @@ libxml_CFLAGS = @libxml_CFLAGS@
 libxml_LIBS = @libxml_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
+lua5_2_CFLAGS = @lua5_2_CFLAGS@
+lua5_2_LIBS = @lua5_2_LIBS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -215,6 +217,8 @@ standingsbuilder_SOURCES = src/Contest.cpp \
                             src/FileReader.h \
                             src/GenericParserBuilder.cpp \
                             src/GenericParserBuilder.h \
+                            src/luacontestlib.cpp \
+                            src/luacontestlib.h \
                             src/main.cpp \
                             src/Parser.cpp \
                             src/Parser.h \
@@ -236,8 +240,9 @@ standingsbuilder_SOURCES = src/Contest.cpp \
                             src/Parsers/Timer.cpp\
                             src/Parsers/Timer.h
 
-INCLUDES = @libcurl_CFLAGS@ @libxml_CFLAGS@
-standingsbuilder_LDADD = @libcurl_LIBS@ @libxml_LIBS@
+INCLUDES = @libcurl_CFLAGS@@libxml_CFLAGS@@lua5_2_CFLAGS@
+standingsbuilder_LDADD = @libcurl_LIBS@@libxml_LIBS@@lua5_2_LIBS@
+EXTRA_DIST = outputSimpleStyle.lua outputEjudgeStyle.lua
 all: all-am
 
 .SUFFIXES:
@@ -353,6 +358,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Unroller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/luacontestlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .cpp.o:
@@ -410,6 +416,20 @@ GenericParserBuilder.obj: src/GenericParserBuilder.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/GenericParserBuilder.cpp' object='GenericParserBuilder.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GenericParserBuilder.obj `if test -f 'src/GenericParserBuilder.cpp'; then $(CYGPATH_W) 'src/GenericParserBuilder.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GenericParserBuilder.cpp'; fi`
+
+luacontestlib.o: src/luacontestlib.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT luacontestlib.o -MD -MP -MF $(DEPDIR)/luacontestlib.Tpo -c -o luacontestlib.o `test -f 'src/luacontestlib.cpp' || echo '$(srcdir)/'`src/luacontestlib.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/luacontestlib.Tpo $(DEPDIR)/luacontestlib.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/luacontestlib.cpp' object='luacontestlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o luacontestlib.o `test -f 'src/luacontestlib.cpp' || echo '$(srcdir)/'`src/luacontestlib.cpp
+
+luacontestlib.obj: src/luacontestlib.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT luacontestlib.obj -MD -MP -MF $(DEPDIR)/luacontestlib.Tpo -c -o luacontestlib.obj `if test -f 'src/luacontestlib.cpp'; then $(CYGPATH_W) 'src/luacontestlib.cpp'; else $(CYGPATH_W) '$(srcdir)/src/luacontestlib.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/luacontestlib.Tpo $(DEPDIR)/luacontestlib.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/luacontestlib.cpp' object='luacontestlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o luacontestlib.obj `if test -f 'src/luacontestlib.cpp'; then $(CYGPATH_W) 'src/luacontestlib.cpp'; else $(CYGPATH_W) '$(srcdir)/src/luacontestlib.cpp'; fi`
 
 main.o: src/main.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main.o -MD -MP -MF $(DEPDIR)/main.Tpo -c -o main.o `test -f 'src/main.cpp' || echo '$(srcdir)/'`src/main.cpp

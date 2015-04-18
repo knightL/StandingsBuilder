@@ -9,10 +9,41 @@
 #include <cassert>
 #include <fstream>
 #include <iomanip>
+#include <cstdlib>
+#include <sstream>
 using namespace std;
 
-Contest::Contest(int problem_cnt) {
+Contest::Contest(int problem_cnt, std::string script_file_name) {
 	this->problem_count=problem_cnt;
+
+	//initalize Lua
+	this->lvm=luaL_newstate();
+	if( lvm == NULL)
+	{
+		printf("Failed to initialize Lua\n");
+		exit(2);
+	}
+
+	luaL_openlibs( lvm );
+	//initilize contest library for Lua
+	lua_contest_init(lvm);
+
+	//run script from file
+	if ( luaL_dofile( lvm, script_file_name.c_str() ) )
+	{
+		printf("Failed to load LUA script from file \"%s\"\n%s\n",script_file_name.c_str(), lua_tostring( lvm, -1) );
+		exit(2);
+	}
+	//check, that function printStandings is present
+	lua_getglobal( lvm, "printStandings" );
+	if ( !lua_isfunction( lvm, -1) )
+	{
+		printf("No printStandings function in LUA script\n");
+		exit(2);
+	}
+	//clear stack
+	lua_pop( lvm, 1 );
+	
 }
 
 Contest::~Contest()
@@ -21,12 +52,18 @@ Contest::~Contest()
 	for(map<string,pTeam>::iterator it = this->teams.begin();
 			it != this->teams.end() ; it++)
 		delete it->second;
+	// close Lua
+	lua_close( lvm );
 }
 
+bool Contest::team_exists(string name) const
+{
+	return this->teams.count(name);
+}
 
 pTeam Contest::extract_team(string name)
 {
-	if(!this->teams.count(name))
+	if(!team_exists(name))
 	{
 		// if there is no team with such name, then allocate new
 		pTeam team = new Team(name, this->problem_count);
@@ -57,53 +94,66 @@ void Contest::add_team(pTeam team)
 	this->standings.insert(make_pair(team->get_result(),team));
 }
 
+
 void Contest::print_standings(std::string file, int curtime)
 {
+	prepare_teams_places();
+
 	// open output file
-	ofstream out(file.c_str());
-	if((out.rdstate()& std::ifstream::failbit)!=0)
+	lua_getglobal( lvm, "io");
+	lua_pushstring(lvm, "open");
+	lua_gettable(lvm, -2);
+	lua_pushstring(lvm, file.c_str());
+	lua_pushstring(lvm, (const char*) "w");
+	lua_call(lvm, 2, 2);
+	if(lua_isstring (lvm, -1) )
 	{
-		printf("Failed to open file \"%s\"",file.c_str());
+		printf("Failed to open file \"%s\"\n%s\n",file.c_str(), lua_tostring(lvm, -1));
+		lua_pop( lvm, 2);
 		return;
 	}
-
-	// output html header and time elapsed since contest start
-	int hh,mm;
-	hh=curtime/60;
-	mm=curtime%60;
-	out<<"<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><title>Положение участников</title></head><body>"<<endl<<"<h1>Положение участников ["<<hh<<":"<<setw(2)<<setfill('0')<<mm<<"]</h1>"<<endl;
-
-	// transform set into vector
-	vector<pair<Result,pTeam> > stand(this->standings.begin(),this->standings.end());
-	vector<int> total(problem_count);
-	vector<int> success(problem_count);
-	vector<int> first_success(problem_count,-1);
-	// for each problem calculate first time anyone solved it (accurate to minutes)
-	// and calculate total number of attempts and successful attempts
-	for(int i=0;i<problem_count;i++)
-		for(int j=0;j<(int)stand.size();j++)
-		{
-			total[i]+=stand[j].second->attempts[i] +(stand[j].second->solved[i]?1:0);
-			success[i]+=stand[j].second->solved[i]?1:0;
-			if(stand[j].second->solved[i] && stand[j].second->time[i]!=-1)
-				if(first_success[i]==-1 || first_success[i]> stand[j].second->time[i])
-					first_success[i]=stand[j].second->time[i];
-		}
-	int total_sum=accumulate(total.begin(),total.end(),0);
-	int success_sum=accumulate(success.begin(),success.end(),0);
+	lua_pop(lvm,1);
 	
-	// output table header
-	out<<"<table border=\"1\">"<<endl;
-	out<<"<tr>";
-	out<<"<th>Место</th>";
-	out<<"<th>Участник</th>";
-	for(int i=0;i<problem_count;i++)
-		out<<"<th>"<<(char)('A'+i)<<"</th>";
-	out<<"<th>Всего</th>";
-	out<<"<th>Штраф</th>";
-	out<<"</tr>"<<endl;
+	//place printStandings to stack
+	lua_getglobal( lvm, "printStandings" );
 
-	// output teams
+	//push file as first argument
+	lua_pushvalue( lvm, -2);
+
+	//create and fill table of users ordered by their place
+	vector<pair<Result,pTeam> > stand(this->standings.begin(),this->standings.end());
+	lua_createtable ( lvm, stand.size(), 0);
+	for(int i=0;i<stand.size();i++)
+	{
+		lua_pushinteger( lvm, i+1);
+		lua_pushstring( lvm, stand[i].second->get_name().c_str() );
+		lua_settable( lvm, -3 );
+	}
+
+	// push current time as third argument
+	lua_pushinteger(lvm, curtime);
+	// call function
+	lua_call( lvm, 3, 0);
+	
+	// close file
+	lua_pushstring(lvm, "close");
+	lua_gettable(lvm, -3);
+	lua_insert(lvm, -2);
+	lua_call(lvm, 1, 0);
+
+	// clear stack
+	lua_pop(lvm, 1);
+}
+
+int Contest::count_problems() const
+{
+	return problem_count;
+}
+
+void Contest::prepare_teams_places()
+{
+	team_place.clear();
+	vector<pair<Result,pTeam> > stand(this->standings.begin(),this->standings.end());
 	for(int i=0;i<(int)stand.size();)
 	{
 		int j;
@@ -111,108 +161,76 @@ void Contest::print_standings(std::string file, int curtime)
 		for(j=i+1; j<(int)stand.size() && stand[i].first==stand[j].first; j++);
 		int spos=i+1;
 		int epos=j;
-		// output all teams with same score
-		while(i<j)
-		{
-			pTeam cur=stand[i].second;
-			//depending on style of team set row color
-			if(cur->type==0)
-				out<<"<tr>";
-			else if(cur->type==1)
-				out<<"<tr bgcolor=\"yellow\">";
-			else if(cur->type==2)
-				out<<"<tr bgcolor=\"orange\">";
-			else if(cur->type==3)
-				out<<"<tr bgcolor=\"pink\">";
-			else if(cur->type==4)
-				out<<"<tr bgcolor=\"silver\">";
-			else
-			{
-				printf("Unknown style %d\n",cur->type);
-				out<<"<tr>";
-			}
-
-			// output teams place
-			if(spos!=epos)
-				out<<"<td>"<<spos<<"-"<<epos<<"</td>";
-			else
-				out<<"<td>"<<spos<<"</td>";
-			
-			//output team name
-			out<<"<td>"<< cur->get_name() <<"</td>";
-
-			//output problems
-			for(int k=0;k<problem_count;k++)
-			{
-				// if team solved this problem with same time as best, make cell lime
-				if(!cur->solved[k] || cur->time[k]!=first_success[k] || cur->time[k]==-1)
-					out<<"<td>";
-				else
-					out<<"<td bgcolor=\"lime\">";
-
-				// output number of attempts to solve problem
-				if(!cur->solved[k] && !cur->attempts[k])
-					out<<"&nbsp;";
-				else if(!cur->solved[k])
-					out<<"-"<<cur->attempts[k]<<"";
-				else if(cur->solved[k] && !cur->attempts[k])
-					out<<"+";
-				else
-					out<<"+"<<cur->attempts[k]<<"";
-
-				// if problem was solved, then output it time
-				if(cur->solved[k])
-				{
-					// if we have no information, about the time, output X:XX
-					if(cur->time[k]==-1)
-						out<<" <div>(X:XX)</div>";
-					else
-					{
-						int h=cur->time[k]/60;
-						int m=cur->time[k]%60;
-						out<<" <div>("<<h<<":"<<setw(2)<<setfill('0')<<m<<")</div>";
-					}
-				}
-				out<<"</td>";
-			}
-			// output number of solved problems and penalty
-			out<<"<td>"<<cur->get_result().problems<<"</td>";
-			out<<"<td>"<<cur->get_result().penalty<<"</td>";
-			out<<"</tr>"<<endl;
-			i++;
-		}
+		ostringstream s;
+		s<<spos;
+		if(epos!=spos) s<<"-"<<epos;
+		string pos=s.str();
+		for(;i<j;i++)
+			team_place[stand[i].second->get_name()]=pos;
 	}
+}
 
-	// tail table with statistic
-	// total number of attempts
-	out<<"<tr><td>&nbsp;</td><td>Total:</td>";
-	for(int i=0;i<problem_count;i++)
-		out<<"<td>"<<total[i]<<"</td>";
-	out<<"<td>"<<total_sum<<"</td><td>&nbsp;</td></tr>"<<endl;
+string Contest::get_team_place(string name) const
+{
+	map<string, string>::const_iterator it=team_place.find(name);
+	if(it==team_place.end()) return "";
+	else return it->second;
+}
 
-	// number of successful attempts
-	out<<"<tr><td>&nbsp;</td><td>Success:</td>";
-	for(int i=0;i<problem_count;i++)
-		out<<"<td>"<<success[i]<<"</td>";
-	out<<"<td>"<<success_sum<<"</td><td>&nbsp;</td></tr>"<<endl;
+string Contest::get_team_style(string name) const
+{
+	map<string, pTeam>::const_iterator it=teams.find(name);
+	if(it==teams.end()) return "";
+	else return it->second->type;
+}
 
-	// and percent of successful attempts
-	out<<"<tr><td>&nbsp;</td><td>%:</td>";
-	for(int i=0;i<problem_count;i++)
-		out<<"<td>"<<(total[i]==0?0:((success[i]*100+total[i]/2)/total[i]))<<"%</td>";
-	out<<"<td>"<<(total_sum==0?0:(success_sum*100+total_sum/2)/total_sum)<<"%</td><td>&nbsp;</td></tr>"<<endl;
+int Contest::get_team_problems_solved(string name) const
+{
+	map<string, pTeam>::const_iterator it=teams.find(name);
+	if(it==teams.end()) return 0;
+	else return it->second->result.problems;
+}
 
-	// finish table by reprinting head from table
-	out<<"<tr>";
-	out<<"<th>Место</th>";
-	out<<"<th>Участник</th>";
-	for(int i=0;i<problem_count;i++)
-		out<<"<th>"<<(char)('A'+i)<<"</th>";
-	out<<"<th>Всего</th>";
-	out<<"<th>Штраф</th>";
-	out<<"</tr>"<<endl;
+int Contest::get_team_penalty(string name) const
+{
+	map<string, pTeam>::const_iterator it=teams.find(name);
+	if(it==teams.end()) return 0;
+	else return it->second->result.penalty;
+}
 
-	out<<"</table></body></html>"<<endl;
-	out.close();
+int Contest::get_team_problem_attempts(string name, int pid) const
+{
+	if(0<=pid && pid<problem_count)
+	{
+		map<string, pTeam>::const_iterator it=teams.find(name);
+		if(it==teams.end()) return 0;
+		else return it->second->attempts[pid];
+	}
+	else
+		return 0;
+}
+
+bool Contest::get_team_solved(string name, int pid) const
+{
+	if(0<=pid && pid<problem_count)
+	{
+		map<string, pTeam>::const_iterator it=teams.find(name);
+		if(it==teams.end()) return false;
+		else return it->second->solved[pid];
+	}
+	else
+		return false;
+}
+
+int Contest::get_team_problem_time(string name, int pid) const
+{
+	if(0<=pid && pid<problem_count)
+	{
+		map<string, pTeam>::const_iterator it=teams.find(name);
+		if(it==teams.end()) return -1;
+		else return it->second->time[pid];
+	}
+	else
+		return -1;
 }
 

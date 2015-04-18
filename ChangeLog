@@ -1,9 +1,15 @@
+version 1.3
+- now standings are built by lua script specified by user
+- fixed possible issue with more than 26 problems in contest
+- parser style can now be any string, not only one of preset number
+
 version 1.2
 - merged EjudgeLinkParser and EjudgeFileParser into one EjudgeParser
 - rewritten Timer and added attribute
 - it is possible to compile project without libcurl, though the program will be unable to download files from internet
 - renamed Timeout property. Now it is called RefreshRate
 - now source contains some commentaries
+- added new property to all parsers - Prefix. All parsers should prepend team names, that are created or changed by them.
 
 version 1.1:
 - rewrote parser registration. Now the only place to modify in order to add new parser is main()

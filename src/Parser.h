@@ -9,13 +9,15 @@
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <string>
 #include "Contest.h"
 #include "XMLParser.h"
 
 class Parser {
 protected:
 	int curtime;
-	int style;
+	std::string style;
+	std::string prefix;
 public:
 	Parser(const XMLParser& config, xmlNodePtr start);
 	virtual ~Parser();

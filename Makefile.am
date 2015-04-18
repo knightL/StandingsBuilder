@@ -5,6 +5,8 @@ standingsbuilder_SOURCES =  src/Contest.cpp \
                             src/FileReader.h \
                             src/GenericParserBuilder.cpp \
                             src/GenericParserBuilder.h \
+                            src/luacontestlib.cpp \
+                            src/luacontestlib.h \
                             src/main.cpp \
                             src/Parser.cpp \
                             src/Parser.h \
@@ -25,6 +27,6 @@ standingsbuilder_SOURCES =  src/Contest.cpp \
                             src/Parsers/NEERCHtmlParser.h\
                             src/Parsers/Timer.cpp\
                             src/Parsers/Timer.h
-INCLUDES = @libcurl_CFLAGS@ @libxml_CFLAGS@
-standingsbuilder_LDADD = @libcurl_LIBS@ @libxml_LIBS@
-
+INCLUDES = @libcurl_CFLAGS@@libxml_CFLAGS@@lua5_2_CFLAGS@
+standingsbuilder_LDADD = @libcurl_LIBS@@libxml_LIBS@@lua5_2_LIBS@
+EXTRA_DIST = outputSimpleStyle.lua outputEjudgeStyle.lua

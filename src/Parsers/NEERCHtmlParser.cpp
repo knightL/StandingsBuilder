@@ -83,6 +83,7 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):Pars
 				if(!cur) break;
 				// read information about team and store it as events
 				string name=(char*)xmlNodeGetContent(cur);
+				name=prefix+name;
 				for(int i=0;i<problem_count;i++)
 				{
 					cur=xml.getNext(cur);

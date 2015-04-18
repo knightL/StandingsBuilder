@@ -11,7 +11,6 @@
 #include "Contest.h"
 #include <vector>
 #include <string>
-#include <curl/curl.h>
 #include "singletone.h"
 #include "GenericParserBuilder.h"
 
@@ -22,8 +21,8 @@ class _Unroller {
 	std::vector<GenericParserBuilder*> builders;
 	std::vector<Parser*> parsers;
 	int refresh_rate;
-public:
 	Contest *contest;
+public:
 	_Unroller();
 	~_Unroller();
 	void run();
@@ -34,6 +33,7 @@ public:
 	}
 	void print_help(std::string name);
 	int get_problem_count() const;
+	Contest* get_contest();
 };
 
 typedef SingleTone<_Unroller> Unroller;

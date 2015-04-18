@@ -15,7 +15,7 @@ typedef class Team* pTeam;
 
 class Team {
 	std::string name;
-	int type;
+	std::string type;
 	Result result;
 	std::vector<int> attempts;
 	std::vector<bool> solved;
@@ -38,7 +38,8 @@ public:
 	/**
 	 * sets team type. different type gives different color of background
 	 **/
-	void set_type(int type);
+	void set_type(std::string type);
+
 	Result get_result() const;
 
 	friend class Contest;

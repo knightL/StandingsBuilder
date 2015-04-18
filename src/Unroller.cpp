@@ -15,9 +15,20 @@
 #include <ctime>
 #include "XMLParser.h"
 #include "config.h"
+#ifdef WIN32
+#include <windows.h>
+#endif /* WIN32 */
 using namespace std;
 
 const int MAXIMAL_TIME=(1U<<31)-1;
+
+static std::string getProblemName(int id)
+{
+	if(1<=id && id<=26)
+		return std::string(1,'A'+id-1);
+	else
+		return getProblemName((id-1)/26+1) + std::string(1,'A'+(id-1)%26);
+}
 
 _Unroller::_Unroller() {
 	contest=NULL;
@@ -75,6 +86,15 @@ void _Unroller::init(int argc, char** argv)
 	}
 	output_file_name=(char*)xmlNodeGetContent(node);
 
+	//read path to script which will build output file
+	node=parser.findNode(parser.getChild(parser.getRoot()),"OutputScript");
+	if(!node)
+	{
+		printf("Failed to find \"OutputScipt\" in xml config \n");
+		exit(1);
+	}
+	string script_file_name=(char*)xmlNodeGetContent(node);
+
 	// read refresh rate, default value 300 seconds
 	node=parser.findNode(parser.getChild(parser.getRoot()),"RefreshRate");
 	if(node)
@@ -83,7 +103,7 @@ void _Unroller::init(int argc, char** argv)
 		printf("No refresh rate provided. Using default value: %d\n",this->refresh_rate);
 
 	printf("Output File:   %s\n",output_file_name.c_str());
-	printf("Problem Count: %d (%c-%c)\n",problem_count, 'A','A'+problem_count-1);
+	printf("Problem Count: %d (%s-%s)\n",problem_count, "A", getProblemName(problem_count).c_str());
 
 	// read parsers and store them
 	printf("Parsers:\n");
@@ -105,7 +125,7 @@ void _Unroller::init(int argc, char** argv)
 			printf("%s\n",name.c_str());
 	}
 
-	contest=new Contest(problem_count);
+	contest=new Contest(problem_count,script_file_name);
 }
 
 _Unroller::~_Unroller() {
@@ -137,7 +157,9 @@ void _Unroller::run()
 	if(!parser_provides_time)
 		printf("No parser provides time. Maximal time will be used\n");
 	printf("Running...\n");
+#ifdef linux
 	timespec delay;
+#endif /* linux */
 	// update all parsers every (refresh_rate) seconds
 	while(1)
 	{
@@ -161,9 +183,20 @@ void _Unroller::run()
 		contest->print_standings(this->output_file_name, parser_provides_time?curtime:0);
 
 		//make delay
+#ifdef WIN32
+		Sleep(refresh_rate*1000);
+#elif linux
 		delay.tv_sec=refresh_rate;
 		delay.tv_nsec=0;
 		nanosleep(&delay,NULL);
+#else
+#error unknown architecutre
+#endif
 	}
+}
+
+Contest* _Unroller::get_contest()
+{
+	return contest;
 }
 
