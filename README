@@ -22,7 +22,7 @@ Program requires XML config of the following form (case sensitive):
       </Parsers>
     </Builder>
 
-ProblemCount is number of problems in current contest
+ProblemCount is number of problems in current contest or id of last problem written in capital letters
 RefreshRate is delay in seconds, after which output file will be rewritten
 OutputFile is path to file, where the result of program will be written
 OutputScript is path to script file in Lua which will fill the output file. For more information on it see the section below
@@ -35,13 +35,15 @@ place it into log). Currently supported parsers:
      Necessary attribute: [Path] or [URL]
      Optional attribute: [Timeless]=No/Yes
      Downloads Ejudge standings either on local computer from[Path] or by link [URL], parses it and puts teams in it into resulting standing. If [Timeless] is true, the parser will not attempt to get and store time of submissions
+     Optional attribute: [IgnoreColumns]
+     List of space separated numbers of columns, that should be ignored to properly parse table.
 
  > NEERCXmlParser
      Necessary attribute: [Path] or [URL]
      Parses NEERC contests history pack and unrolles by simulating attempts from it.
 
  > NEERCHtmlParser
-     Necessary attribute: [Path]
+     Necessary attribute: [Path] or [URL]
      Optional attribute: [HideUnsolved]=No/Yes
      Reads final standings of NEERC contest in HTML format and attempts to simulate it. It is unknown, when were wrong attempts made, so for problems that were accepted all wrong attempts were made simultaneously with accepted one. If problem wasn't solved, all attempts will be shown at start or won't be shown at all depending on [HideUnsolved]
 

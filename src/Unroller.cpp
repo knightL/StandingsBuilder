@@ -37,6 +37,40 @@ _Unroller::_Unroller() {
 	refresh_rate=5*60;
 }
 
+int _Unroller::parse_problem_count(const char* str) const
+{
+	int res=0;
+	if('0'<=str[0] && str[0]<='9')
+	{
+
+		for(int i=0;str[i];i++)
+			if('0'<=str[i] && str[i]<='9')
+			{
+				res=res*10+str[i]-'0';
+			}
+			else
+			{
+				printf("Failed to read \"ProblemCount\". Got %s\n",str);
+				exit(1);
+			}
+	}
+	else
+	{
+		for(int i=0;str[i];i++)
+			if('A'<=str[i] && str[i]<='Z')
+			{
+				res=res*26+str[i]-'A';
+			}
+			else
+			{
+				printf("Failed to read \"ProblemCount\". Got %s\n",str);
+				exit(1);
+			}
+		res++;
+	}
+	return res;
+}
+
 void _Unroller::init(int argc, char** argv)
 {
 	printf("Standings Builder v"VERSION"\n");
@@ -68,8 +102,7 @@ void _Unroller::init(int argc, char** argv)
 		printf("Failed to find \"ProblemCount\" in xml config \n");
 		exit(1);
 	}
-	problem_count=atoi((char*)xmlNodeGetContent(node));
-	curtime=0;
+	problem_count=parse_problem_count((char*)xmlNodeGetContent(node));
 
 	if(problem_count<=0)
 	{

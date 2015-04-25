@@ -9,8 +9,10 @@
 #include "../FileReader.h"
 #include "libxml/HTMLparser.h"
 #include <vector>
+#include <sstream>
 #include <cassert>
 #include <cstring>
+#include <algorithm>
 using namespace std;
 
 EjudgeParser::EjudgeParser(const XMLParser& config, xmlNodePtr start):
@@ -24,6 +26,16 @@ EjudgeParser::EjudgeParser(const XMLParser& config, xmlNodePtr start):
 		timeless=false;
 	else
 		timeless=!strcmp((char*)xmlNodeGetContent(ptr),"Yes");
+	ptr=(xmlNodePtr)config.findAttribute(start->properties,"IgnoreColumns");
+	if(ptr!=NULL)
+	{
+		istringstream in((char*)xmlNodeGetContent(ptr));
+		int id;
+		while(in>>id)
+			ignore.push_back(id-1);
+		sort(ignore.begin(), ignore.end());
+		ignore.erase( unique(ignore.begin(), ignore.end()), ignore.end());
+	}
 }
 
 EjudgeParser::~EjudgeParser() {
@@ -73,6 +85,25 @@ void EjudgeParser::update()
 	}
 }
 
+void EjudgeParser::skip_ignored(xmlNodePtr &col, int &ignore_top, int &col_id) const
+{
+	while (true)
+	{
+		while(ignore_top<(int)ignore.size() && ignore[ignore_top]<col_id )
+		{
+			ignore_top++;
+		}
+	
+		if( ignore_top<(int)ignore.size() && ignore[ignore_top]==col_id )
+		{
+			col=xml->getNext(col);
+			col_id++;
+		}
+		else
+			break;
+	}
+}
+
 void EjudgeParser::updateContest(Contest* contest, int)
 {
 	if(!xml) return;
@@ -92,12 +123,22 @@ void EjudgeParser::updateContest(Contest* contest, int)
 	// parse every row of the table
 	while(row)
 	{
+		int ignore_top=0;
+		int col_id=0;
+		
 		row=xml->findNode(xml->getNext(row),"tr");
 		if(!row) break;
+		
 		xmlNodePtr col=xml->getChild(row);
+		skip_ignored(col, ignore_top, col_id);
+		
 		// if we can't get place from first column, then we are done with teams
 		if(atoi((char*)xmlNodeGetContent(col))==0) break;
+		
 		col=xml->getNext(col);
+		col_id++;
+		skip_ignored(col, ignore_top, col_id);
+		
 		// get team name and allocate place to store information about submission
 		url_guys.push_back(prefix+string((char*)xmlNodeGetContent(col)));
 		attempts.push_back(vector<int>(problem_count));
@@ -106,6 +147,9 @@ void EjudgeParser::updateContest(Contest* contest, int)
 		for(int i=0;i<problem_count;i++)
 		{
 			col=xml->getNext(col);
+			col_id++;
+			skip_ignored(col, ignore_top, col_id);
+			
 			char buf[300];
 			// wipe out all punctuation parentheses and colons
 			strcpy(buf,(char*)xmlNodeGetContent(col));
@@ -143,8 +187,14 @@ void EjudgeParser::updateContest(Contest* contest, int)
 		{
 			// if we can't get time of submission lets store number of solved problems and penalty
 			col=xml->getNext(col);
+			col_id++;
+			skip_ignored(col, ignore_top, col_id);
+			
 			int solved=atoi((char*)xmlNodeGetContent(col));
 			col=xml->getNext(col);
+			col_id++;
+			skip_ignored(col, ignore_top, col_id);
+			
 			int penalty=atoi((char*)xmlNodeGetContent(col));
 			res.push_back(Result(solved,penalty));
 		}
@@ -188,7 +238,8 @@ std::string EjudgeParser::getDescription()
 			"<URL> - url to ejudge standings\n"
 #endif
            "Optional attributes:\n"
-		   "<Timeless> - [No/Yes] whether standings have time of submission or not";
+		   "<Timeless> - [No/Yes] whether standings have time of submission or not\n"
+		   "<IgnoreColumns> - Space separated list of column numbers that will not be processed";
 
 }
 

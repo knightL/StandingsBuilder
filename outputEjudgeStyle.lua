@@ -8,7 +8,7 @@ end
 
 function timeToString( time )
 	if time<0 then
-		return "X:XX"
+		return "-:--"
 	else
 		local hh=math.floor(time/60)
 		local mm=time%60
@@ -74,7 +74,7 @@ function printStandings ( file, teams, time )
 	end
 
 	file:write("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><title>Положение участников</title></head><body>\n");  
-	file:write("<h1>Положение участников "..timeToString(time).."</h1>\n")
+	file:write("<h1>Положение участников ["..timeToString(time).."]</h1>\n")
 	file:write("<table border=\"1\">\n")
 	file:write("<tr>")
 	file:write("<th>Место</th><th>Участник</th>")

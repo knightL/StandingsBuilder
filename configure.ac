@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([standingsbuilder], [1.3], [knightLA@yandex.ru])
+AC_INIT([standingsbuilder], [1.31], [knightLA@yandex.ru])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config.h])

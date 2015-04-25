@@ -22,6 +22,7 @@ class _Unroller {
 	std::vector<Parser*> parsers;
 	int refresh_rate;
 	Contest *contest;
+	int parse_problem_count(const char* str) const;
 public:
 	_Unroller();
 	~_Unroller();

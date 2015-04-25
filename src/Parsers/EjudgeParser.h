@@ -15,7 +15,9 @@ class EjudgeParser: public Parser, public FileReader {
 protected:
 	XMLParser *xml;
 	std::vector<std::string> teams;
+	std::vector<int> ignore;
 	bool timeless;
+	void skip_ignored(xmlNodePtr &cur, int &ignore_top, int &col_id) const;
 public:
 	EjudgeParser(const XMLParser& config, xmlNodePtr start);
 	virtual ~EjudgeParser();
