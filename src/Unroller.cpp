@@ -73,7 +73,7 @@ int _Unroller::parse_problem_count(const char* str) const
 
 void _Unroller::init(int argc, char** argv)
 {
-	printf("Standings Builder v"VERSION"\n");
+	printf("Standings Builder v" VERSION "\n");
 
 	// program should run with one single argument - path to XML config
 	char path[300];
@@ -215,6 +215,9 @@ void _Unroller::run()
 		// print standings to output file
 		contest->print_standings(this->output_file_name, parser_provides_time?curtime:0);
 
+		// if delay is zero, end cycle
+		if(refresh_rate==0)
+			break;
 		//make delay
 #ifdef WIN32
 		Sleep(refresh_rate*1000);

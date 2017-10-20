@@ -84,6 +84,7 @@ FileReader::FileReader(const XMLParser& config, xmlNodePtr start)
 		char* p = (char*)config.getAttributeContent(start,"Path");
 		path=p;
 		sourcetype=FileSource;
+		config.free((xmlChar*)p);
 	}
 #ifdef HAVE_LIBCURL
 	else if(config.haveAttribute(start,"URL"))
@@ -91,6 +92,7 @@ FileReader::FileReader(const XMLParser& config, xmlNodePtr start)
 		char* p = (char*)config.getAttributeContent(start,"URL");
 		path=p;
 		sourcetype=URLSource;
+		config.free((xmlChar*)p);
 	}
 #endif /* HAVE_LIBCURL */
 	else

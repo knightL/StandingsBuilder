@@ -14,6 +14,11 @@ XMLParser::XMLParser(xmlDocPtr doc)
 	root=xmlDocGetRootElement(doc);
 }
 
+xmlDoc* XMLParser::getDoc() const
+{
+	return this->doc;
+}
+
 xmlNode* XMLParser::getRoot() const
 {
 	return root;
@@ -46,6 +51,19 @@ xmlNode* XMLParser::findNode(xmlNodePtr start, std::string nodeName) const
 	return start;
 }
 
+xmlNode* XMLParser::walkPath(xmlNodePtr start, const std::vector<std::string>& path) const
+{
+	xmlNodePtr cur=start;
+	for(const std::string& s: path)
+		if(s==">")
+			cur=this->getChild(cur);
+		else if(s=="+")
+			cur=this->getNext(cur);
+		else
+			cur=this->findNode(cur, s);
+	return cur;
+}
+
 xmlAttrPtr XMLParser::findAttribute(xmlAttrPtr start, std::string AttrName) const
 {
 	while(start && strcmp(AttrName.c_str(), (char*) start->name))
@@ -62,6 +80,29 @@ xmlChar* XMLParser::getAttributeContent(xmlNodePtr start, std::string  attrName)
 {
 	xmlAttrPtr ptr=findAttribute(start->properties, attrName);
 	return ptr? xmlNodeGetContent((xmlNodePtr)ptr): NULL;
+}
+
+std::string XMLParser::getNodeContent(xmlNodePtr node) const
+{
+	if(!node)
+	{
+		fprintf(stderr,"Warning: Got Empty Node\n");
+		return "";
+	}
+	xmlChar* cur=xmlNodeListGetString(doc, node->children, 1);
+	if(!cur)
+	{
+		fprintf(stderr,"Warning: No content found\n");
+		return "";
+	}
+	std::string res=(char*)cur;
+	this->free(cur);
+	return res;
+}
+
+void XMLParser::free(xmlChar* data) const
+{
+	xmlFree(data);
 }
 
 XMLParser::~XMLParser()

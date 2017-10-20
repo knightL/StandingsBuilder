@@ -1,5 +1,5 @@
 /*
- * NEERCHtmlParser.cpp
+ * NYParser.cpp
  *
  *      Author: knightl
  */
@@ -7,16 +7,14 @@
 #include "../FileReader.h"
 #include "../Unroller.h"
 #include "libxml/HTMLparser.h"
-#include "NEERCHtmlParser.h"
+#include "NYParser.h"
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
 using namespace std;
 
-NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
-	EventBasedParser(config,start) 
-{
+NYParser::NYParser(const XMLParser& config, xmlNodePtr start):EventBasedParser(config,start) {
 	Unroller unroller;
 	FileReader reader(config, start);
 	int problem_count=unroller->get_problem_count();
@@ -45,58 +43,65 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 				}
 			}
 			XMLParser xml((xmlDocPtr)htmlReadMemory(buf+top,len-top,NULL,NULL,0));
-			xmlNodePtr start=xml.walkPath(xml.getRoot(),{">","body",">","table",">","tr",">","td",">","center",">","table",">","tbody",">","tr"});
-			// skip first two lines, since they are just headers
-			for(;start;start=xml.findNode(xml.getNext(start),"tr"))
+			xmlNodePtr start=xml.walkPath(xml.getRoot(), {">", "body", ">", "table", ">", "tbody", ">", "tr"});
+			while(start)
 			{
+				start=xml.findNode(xml.getNext(start),"tr");
 				if(!start) break;
 				xmlNodePtr cur=xml.getChild(start);
-				cur=xml.getNext(cur);
+				if(!cur) break;
+				if(xml.findNode(cur, "th") != NULL) break;
+				cur=xml.getNext(xml.findNode(cur,"td"));
 				if(!cur) break;
 				// read information about team and store it as events
-				string name=(char*)xmlNodeGetContent(cur);
+				cur=xml.findNode(cur,"td");
+				string name=xml.getNodeContent(cur);
 				name=prefix+name;
+				cur=xml.getNext(xml.findNode(cur,"td"));
+				cur=xml.getNext(xml.findNode(cur,"td"));
 				for(int i=0;i<problem_count;i++)
 				{
-					cur=xml.getNext(cur);
-					string t1=(char*)xmlNodeGetContent(cur);
-					if(t1[0]=='-')
+					cur=xml.getNext(xml.findNode(cur,"td"));
+					string t1=xml.getNodeContent(cur);
+					for(int j=0;j<t1.size();j++)
+						if(t1[j]=='/')
+							t1[j]=' ';
+					int acnt=-1;
+					int tac=-1;
+					sscanf(t1.c_str(), "%d%d",&acnt, &tac);
+					if(tac==-1)
 					{
-						if(showUnsolved)
-							this->add_event(0, name, i, false, -atoi(t1.c_str()));
+						if(showUnsolved && acnt>0)
+							this->add_event(0, name, i, false, acnt);
 					}
-					else if(t1[0]=='+')
-					{
-						string t2=(char*)xmlNodeGetContent(xml.getChild(xml.getChild(cur)));
-						t1=t1.substr(0, t1.size() - t2.size() );
-						this->add_event( atoi(t2.c_str()), name, i, true, (t1.size()==1)?0:atoi(t1.c_str()) );
-					}
+					else
+						this->add_event(tac, name, i, true, acnt-1);
 				}
 			}
 		}
 	}
 }
 
-NEERCHtmlParser::~NEERCHtmlParser() {
+NYParser::~NYParser() {
 }
 
-bool NEERCHtmlParser::providesTime()
+bool NYParser::providesTime()
 {
 	return false;
 }
 
-std::string NEERCHtmlParser::getName()
+std::string NYParser::getName()
 {
-	return "NEERCHtmlParser";
+	return "NYParser";
 }
 
-std::string NEERCHtmlParser::getDescription()
+std::string NYParser::getDescription()
 {
 	return "Necessary attributes:\n"
-		"<Path> - path to neerc standings\n"
+		"<Path> - path to new york standings\n"
 #ifdef HAVE_LIBCURL
 		" or\n"
-		"<URL> - link to neerc standings\n"	
+		"<URL> - link to new york standings\n"	
 #endif
 		"Optional attributes:\n"
 		"<HideUnsolved> - [No/Yes] hide attempts on problems without AC";

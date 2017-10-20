@@ -1,19 +1,19 @@
 /*
- * NEERCHtmlParser.h
+ * NYParser.h
  *
  *      Author: knightl
  */
 
-#ifndef NEERCHTMLPARSER_H_
-#define NEERCHTMLPARSER_H_
+#ifndef NYPARSER_H_
+#define NYPARSER_H_
 
 #include "EventBasedParser.h"
 
 // Parses HTML standings from NEERC format
-class NEERCHtmlParser: public EventBasedParser {
+class NYParser: public EventBasedParser {
 public:
-	NEERCHtmlParser(const XMLParser& config, xmlNodePtr start);
-	virtual ~NEERCHtmlParser();
+	NYParser(const XMLParser& config, xmlNodePtr start);
+	virtual ~NYParser();
 	virtual bool providesTime() ;
 	static std::string getName();
 	static std::string getDescription();

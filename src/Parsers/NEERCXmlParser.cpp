@@ -11,23 +11,9 @@
 #include <algorithm>
 using namespace std;
 
-#include <iostream>
-
-NEERCXmlParser::Event::Event(int time, std::string team, int id, bool accepted):
-	time(time),
-	team(team),
-	id(id),
-	accepted(accepted)
+NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start): 
+	EventBasedParser(config,start) 
 {
-}
-
-bool NEERCXmlParser::Event::operator<(const Event& ev) const
-{
-	return time<ev.time;
-}
-
-
-NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser(config,start) {
 	// Get XML file path from config and open it
 
 	start=(xmlNodePtr)config.findAttribute(start->properties,"Path");
@@ -101,37 +87,16 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):Parser
 						assert(accepted>=0);
 						assert(time>=0);
 
-						event.push_back(Event(time,name,id,accepted));
+						this->add_event(time, name, id, accepted, accepted? 0:1 );
 					}
 				}
 			}
 		}
 		xmlFreeDoc(doc);
-		sort(event.begin(),event.end());
-		reverse(event.begin(),event.end());
 	}
 }
 
 NEERCXmlParser::~NEERCXmlParser() {
-}
-
-void NEERCXmlParser::update()
-{
-}
-
-void NEERCXmlParser::updateContest(Contest* contest, int time)
-{
-	// process all events before (time)
-	while( !event.empty() && event.back().time/1000/60<=time)
-	{
-		// extract team, make an attempt and put it back
-		pTeam team = contest->extract_team(event.back().team) ;
-		team->make_attempt(event.back().time/1000/60, event.back().id, event.back().accepted);
-		team->set_type(style);
-		contest->add_team(team);
-
-		event.pop_back();
-	}
 }
 
 bool NEERCXmlParser::providesTime()
