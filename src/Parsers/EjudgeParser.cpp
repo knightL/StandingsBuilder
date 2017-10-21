@@ -21,15 +21,15 @@ EjudgeParser::EjudgeParser(const XMLParser& config, xmlNodePtr start):
 {
 	xml=NULL;
 	// get from config, if parser should get time of submissions
-	xmlNodePtr ptr=(xmlNodePtr)config.findAttribute(start->properties,"Timeless");
+	xmlAttrPtr ptr=config.findAttribute(start->properties,"Timeless");
 	if(!ptr)
 		timeless=false;
 	else
-		timeless=!strcmp((char*)xmlNodeGetContent(ptr),"Yes");
-	ptr=(xmlNodePtr)config.findAttribute(start->properties,"IgnoreColumns");
+		timeless=config.getCurrentAttributeContent(ptr)=="Yes";
+	ptr=config.findAttribute(start->properties,"IgnoreColumns");
 	if(ptr!=NULL)
 	{
-		istringstream in((char*)xmlNodeGetContent(ptr));
+		istringstream in(config.getCurrentAttributeContent(ptr));
 		int id;
 		while(in>>id)
 			ignore.push_back(id-1);
@@ -68,16 +68,16 @@ void EjudgeParser::update()
 		xmlNodePtr state=xml->findNode(xml->getChild(body), "h1");
 		if(state)
 		{
-			char* description= (char*)xmlNodeGetContent(state);
+			string description= xml->getNodeContent(state);
 			int i;
-			for(i=0;description[i];i++)
+			for(i=0;i<description.size();i++)
 				if(description[i]=='[')
 				{
 					i++;
 					break;
 				}
 			int h,m,s;
-			if(sscanf(description+i,"%d:%d:%d",&h,&m,&s)==3)
+			if(sscanf(&description.c_str()[i],"%d:%d:%d",&h,&m,&s)==3)
 				curtime=m+60*h;
 			else
 				printf("Failed to read time");
@@ -133,14 +133,14 @@ void EjudgeParser::updateContest(Contest* contest, int)
 		skip_ignored(col, ignore_top, col_id);
 		
 		// if we can't get place from first column, then we are done with teams
-		if(atoi((char*)xmlNodeGetContent(col))==0) break;
+		if(atoi(xml->getNodeContent(col).c_str())==0) break;
 		
 		col=xml->getNext(col);
 		col_id++;
 		skip_ignored(col, ignore_top, col_id);
 		
 		// get team name and allocate place to store information about submission
-		url_guys.push_back(prefix+string((char*)xmlNodeGetContent(col)));
+		url_guys.push_back(prefix+xml->getNodeContent(col));
 		attempts.push_back(vector<int>(problem_count));
 		solved.push_back(vector<bool>(problem_count));
 		time.push_back(vector<int>(problem_count));
@@ -150,14 +150,13 @@ void EjudgeParser::updateContest(Contest* contest, int)
 			col_id++;
 			skip_ignored(col, ignore_top, col_id);
 			
-			char buf[300];
+			string buf = xml->getNodeContent(col);
 			// wipe out all punctuation parentheses and colons
-			strcpy(buf,(char*)xmlNodeGetContent(col));
-			for(int j=0;buf[j];j++)
+			for(int j=0;j<buf.size();j++)
 				if(buf[j]=='('||buf[j]==')'||buf[j]==':')
 					buf[j]=' ';
 			// find first + or - if any
-			for(int j=0;buf[j];j++)
+			for(int j=0;j<buf.size();j++)
 			{
 				if(buf[j]=='+')
 				{
@@ -167,10 +166,16 @@ void EjudgeParser::updateContest(Contest* contest, int)
 					if(!isdigit(buf[j]))
 						attempts.back()[i]=0;
 					else
-						attempts.back()[i]=atoi(&buf[j]);
+						attempts.back()[i]=atoi(&buf.c_str()[j]);
 					int h=0,m=-1;
 					if(!timeless)
-						assert(sscanf(buf,"%*s%d%d",&h,&m)==2);
+					{
+						if(sscanf(buf.c_str(),"%*s%d%d",&h,&m)!=2)
+						{
+							fprintf(stderr, "EjudgeParser: Bad formated ejudge table enocuntered: Failed to parse time");
+							return;
+						}
+					}
 					time.back()[i]=60*h+m;
 					break;
 				}
@@ -178,7 +183,7 @@ void EjudgeParser::updateContest(Contest* contest, int)
 				{
 					// store number of attempts
 					solved.back()[i]=0;
-					attempts.back()[i]=-atoi(&buf[j]);
+					attempts.back()[i]=-atoi(&buf.c_str()[j]);
 					break;
 				}
 			}
@@ -190,12 +195,12 @@ void EjudgeParser::updateContest(Contest* contest, int)
 			col_id++;
 			skip_ignored(col, ignore_top, col_id);
 			
-			int solved=atoi((char*)xmlNodeGetContent(col));
+			int solved=atoi(xml->getNodeContent(col).c_str());
 			col=xml->getNext(col);
 			col_id++;
 			skip_ignored(col, ignore_top, col_id);
 			
-			int penalty=atoi((char*)xmlNodeGetContent(col));
+			int penalty=atoi(xml->getNodeContent(col).c_str());
 			res.push_back(Result(solved,penalty));
 		}
 	}

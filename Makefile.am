@@ -33,4 +33,4 @@ standingsbuilder_SOURCES =  src/Contest.cpp \
                             src/Parsers/Timer.h
 AM_CPPFLAGS = @libcurl_CFLAGS@ @libxml_CFLAGS@ @lua5_2_CFLAGS@
 standingsbuilder_LDADD = @libcurl_LIBS@ @libxml_LIBS@ @lua5_2_LIBS@
-EXTRA_DIST = outputSimpleStyle.lua outputEjudgeStyle.lua
+EXTRA_DIST = config.xml outputSimpleStyle.lua outputEjudgeStyle.lua

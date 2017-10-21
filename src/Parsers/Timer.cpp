@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include <time.h>
 #include <iostream>
+#include <string>
 using namespace std;
 
 Timer::Timer(const XMLParser& config, xmlNodePtr start):Parser(config,start)
@@ -15,18 +16,18 @@ Timer::Timer(const XMLParser& config, xmlNodePtr start):Parser(config,start)
 	int y=0,m=0,d=0;
 	int hh=0,mm=0;
 	tm t;
-	xmlNodePtr ptr=(xmlNodePtr)config.findAttribute(start->properties,"StartTime");
+	xmlAttrPtr ptr=config.findAttribute(start->properties,"StartTime");
 	if(!ptr)
 		printf("Timer: Missing property \"StartTime\"\n");
 	else
 	{
-		char* t=(char*)xmlNodeGetContent(ptr);
-		if(sscanf(t,"%d:%d",&hh,&mm)!=2)
+		string t=config.getCurrentAttributeContent(ptr);
+		if(sscanf(t.c_str(),"%d:%d",&hh,&mm)!=2)
 		{
 			printf("Timer: Bad formated time\n");
 		}
 	}
-	ptr=(xmlNodePtr)config.findAttribute(start->properties,"StartDate");
+	ptr=config.findAttribute(start->properties,"StartDate");
 	if(!ptr)
 	{
 		tm *p;
@@ -44,8 +45,8 @@ Timer::Timer(const XMLParser& config, xmlNodePtr start):Parser(config,start)
 	}
 	else
 	{
-		char* t=(char*)xmlNodeGetContent(ptr);
-		int v=sscanf(t,"%d/%d/%d",&y,&m,&d);
+		string t=config.getCurrentAttributeContent(ptr);
+		int v=sscanf(t.c_str(),"%d/%d/%d",&y,&m,&d);
 		if(v!=3)
 			printf("Timer: Bad formated date\n");
 		if(v>=1)

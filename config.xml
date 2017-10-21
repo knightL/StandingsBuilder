@@ -1,10 +1,10 @@
 <Builder>
-  <ProblemCount>J</ProblemCount>
-  <RefreshRate>0</RefreshRate>
+  <ProblemCount>11</ProblemCount>
+  <RefreshRate>300</RefreshRate>
   <OutputFile>output.html</OutputFile>
-  <OutputScript>outputEjudgeStyle.lua</OutputScript>
+  <OutputScript>script.lua</OutputScript>
   <Parsers>
-	<EjudgeParser URL="http://ejudge.crimea.edu/ejudge/standings22.html" Style="yellow" />
-	<NYParser Path="/home/knightl/index.html" />
+    <Timer StartTime="00:00"/>
+    <NEERCXmlParser Path="standings.xml" Style="yellow" Prefix="*"/>
   </Parsers>
 </Builder>

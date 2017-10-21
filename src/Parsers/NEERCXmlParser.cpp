@@ -5,6 +5,7 @@
  */
 
 #include "NEERCXmlParser.h"
+#include "../FileReader.h"
 #include <string>
 #include <cassert>
 #include <cstring>
@@ -14,85 +15,50 @@ using namespace std;
 NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start): 
 	EventBasedParser(config,start) 
 {
-	// Get XML file path from config and open it
-
-	start=(xmlNodePtr)config.findAttribute(start->properties,"Path");
-	if(!start)
-		printf("NEERCXmlParser: Missing property \"Path\"\n");
-	else
+	FileReader reader(config, start);
+	
+	if(reader.getType()!=FileReader::None)
 	{
-		string path=(char*)xmlNodeGetContent(start);
-		xmlDoc* doc;
-		xmlNode* root, *cur;
-		doc = xmlReadFile(path.c_str(),NULL,0);
-		if(doc==NULL)
+		const char* buf=reader.read();
+		if(buf)
 		{
-			printf("Failed to parse file %s\n",path.c_str());
-			exit(1);
-		}
-		// go down XML tree
-		root=xmlDocGetRootElement(doc);
-		assert(root!=NULL);
-		cur=xmlFirstElementChild(root);
-		assert(cur!=NULL);
-		cur=xmlFirstElementChild(cur);
-		for(;cur;cur=xmlNextElementSibling(cur))
-		{
-			// for each team
-			if(!strcmp( (char*)cur->name, "session" ))
+			xmlNodePtr root, cur;
+			
+			XMLParser xml = XMLParser( xmlReadMemory(buf, strlen(buf), NULL, NULL, 0) );
+
+			// go down XML tree
+			root=xml.getRoot();
+
+			cur=xml.getChild(xml.getChild(root));
+			for(;cur;cur=xml.findNode(xml.getNext(cur), "session"))
 			{
-				string name="";
-				// find team's name
-				xmlAttrPtr attr=cur->properties;
-				for(; attr; attr=attr->next)
-					if( !strcmp( (char*)attr->name, "party") )
-						name=prefix+string((char*)xmlNodeGetContent((xmlNode*)attr));
+				// get team name
+				string name=prefix + xml.getAttributeContent(cur,"party");
 				// for each problem
-				xmlNode* problems=xmlFirstElementChild(cur);
-				for(;problems; problems= xmlNextElementSibling(problems))
+				xmlNodePtr problems=xml.getChild(cur);
+				for(;problems; problems= xml.getNext(problems))
 				{
 					// get problem id
-					attr=problems->properties;
-					int id=-1;
-					for(; attr; attr=attr->next)
-						if( !strcmp( (char*)attr->name, "alias") )
-						{
-							xmlChar* buf=xmlNodeGetContent((xmlNode*)attr);
-							id=buf[0]-'A';
-						}
-					assert(id>=0);
-					// store all submission
-					xmlNode* runs=xmlFirstElementChild(problems);
-					for(; runs; runs= xmlNextElementSibling(runs))
+					string sid=xml.getAttributeContent(problems, "alias");
+					if(sid.empty() || sid[0]<'A' || sid[0]>'Z')
 					{
-						int accepted=-1;
-						int time=-1;
-
-						attr=runs->properties;
-						for(; attr; attr=attr->next)
-							if( !strcmp( (char*)attr->name, "accepted") )
-							{
-								xmlChar* buf=xmlNodeGetContent((xmlNode*)attr);
-								if(buf[0]=='y')
-									accepted=1;
-								else
-									accepted=0;
-							}
-							else if( !strcmp( (char*)attr->name, "time") )
-							{
-								xmlChar* buf=xmlNodeGetContent((xmlNode*)attr);
-								time=atoi((char*)buf);
-							}
-
-						assert(accepted>=0);
-						assert(time>=0);
+						fprintf(stderr, "NEERCXmlParser: Bad formed XML: no alias for a problem found\n");
+						continue;
+					}
+					int id=sid[0]-'A';
+					
+					// store all submission
+					xmlNodePtr runs=xml.getChild(problems);
+					for(; runs; runs= xml.getNext(runs))
+					{
+						int accepted= xml.getAttributeContent(runs, "accepted")=="yes";
+						int time=atoi(xml.getAttributeContent(runs, "time").c_str())/1000/60;
 
 						this->add_event(time, name, id, accepted, accepted? 0:1 );
 					}
 				}
 			}
 		}
-		xmlFreeDoc(doc);
 	}
 }
 

@@ -20,8 +20,8 @@ NYParser::NYParser(const XMLParser& config, xmlNodePtr start):EventBasedParser(c
 	int problem_count=unroller->get_problem_count();
 	bool showUnsolved=true;
 	//get from config file if unsolved problems should be displayed
-	xmlNodePtr attr=(xmlNodePtr)config.findAttribute(start->properties,"HideUnsolved");
-	if( attr!=NULL && !strcmp((char*)xmlNodeGetContent(attr),"Yes"))
+	xmlAttrPtr attr=config.findAttribute(start->properties,"HideUnsolved");
+	if( attr!=NULL && config.getCurrentAttributeContent(attr)!="Yes")
 		showUnsolved=false;
 
 	if(reader.getType()!=FileReader::None)

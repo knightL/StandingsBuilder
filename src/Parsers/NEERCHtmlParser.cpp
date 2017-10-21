@@ -22,8 +22,8 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 	int problem_count=unroller->get_problem_count();
 	bool showUnsolved=true;
 	//get from config file if unsolved problems should be displayed
-	xmlNodePtr attr=(xmlNodePtr)config.findAttribute(start->properties,"HideUnsolved");
-	if( attr!=NULL && !strcmp((char*)xmlNodeGetContent(attr),"Yes"))
+	xmlAttrPtr attr=config.findAttribute(start->properties,"HideUnsolved");
+	if( attr!=NULL && config.getCurrentAttributeContent(attr)!="Yes")
 		showUnsolved=false;
 
 	if(reader.getType()!=FileReader::None)
@@ -32,7 +32,6 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 		const char* buf=reader.read();
 		if(buf)
 		{
-
 			int top=0;
 			int len=strlen(buf);
 			// skip till HTML tag
@@ -44,22 +43,36 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 					break;
 				}
 			}
-			XMLParser xml((xmlDocPtr)htmlReadMemory(buf+top,len-top,NULL,NULL,0));
+			
+			// Parse html
+			XMLParser xml = XMLParser( (xmlDocPtr)htmlReadMemory(buf+top,len-top,NULL,NULL,0) );
+			
+			// Move to first row with team results
 			xmlNodePtr start=xml.walkPath(xml.getRoot(),{">","body",">","table",">","tr",">","td",">","center",">","table",">","tbody",">","tr"});
-			// skip first two lines, since they are just headers
+			
 			for(;start;start=xml.findNode(xml.getNext(start),"tr"))
 			{
-				if(!start) break;
+				// Enter the table row
 				xmlNodePtr cur=xml.getChild(start);
+
+				// Skip rank column
 				cur=xml.getNext(cur);
-				if(!cur) break;
+
+				if(!cur)
+				{
+					fprintf(stderr, "NEERCHtmlParser: Row without team name encountered\n");
+					break;
+				}
+				
 				// read information about team and store it as events
-				string name=(char*)xmlNodeGetContent(cur);
-				name=prefix+name;
+				string name=prefix + xml.getNodeContent(cur);
+
 				for(int i=0;i<problem_count;i++)
 				{
 					cur=xml.getNext(cur);
-					string t1=(char*)xmlNodeGetContent(cur);
+					string t1=xml.getNodeContent(cur);
+					
+					// parse content of Ith problem contents
 					if(t1[0]=='-')
 					{
 						if(showUnsolved)
@@ -67,7 +80,8 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 					}
 					else if(t1[0]=='+')
 					{
-						string t2=(char*)xmlNodeGetContent(xml.getChild(xml.getChild(cur)));
+						//get content of div tag
+						string t2=xml.getNodeContent(xml.getChild(xml.getChild(cur)));
 						t1=t1.substr(0, t1.size() - t2.size() );
 						this->add_event( atoi(t2.c_str()), name, i, true, (t1.size()==1)?0:atoi(t1.c_str()) );
 					}

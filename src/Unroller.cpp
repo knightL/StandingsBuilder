@@ -102,7 +102,7 @@ void _Unroller::init(int argc, char** argv)
 		printf("Failed to find \"ProblemCount\" in xml config \n");
 		exit(1);
 	}
-	problem_count=parse_problem_count((char*)xmlNodeGetContent(node));
+	problem_count=parse_problem_count(parser.getNodeContent(node).c_str());
 
 	if(problem_count<=0)
 	{
@@ -117,7 +117,7 @@ void _Unroller::init(int argc, char** argv)
 		printf("Failed to find \"OutputFile\" in xml config \n");
 		exit(1);
 	}
-	output_file_name=(char*)xmlNodeGetContent(node);
+	output_file_name=parser.getNodeContent(node);
 
 	//read path to script which will build output file
 	node=parser.findNode(parser.getChild(parser.getRoot()),"OutputScript");
@@ -126,12 +126,12 @@ void _Unroller::init(int argc, char** argv)
 		printf("Failed to find \"OutputScipt\" in xml config \n");
 		exit(1);
 	}
-	string script_file_name=(char*)xmlNodeGetContent(node);
+	string script_file_name=parser.getNodeContent(node);
 
 	// read refresh rate, default value 300 seconds
 	node=parser.findNode(parser.getChild(parser.getRoot()),"RefreshRate");
 	if(node)
-		this->refresh_rate=atoi((char*)xmlNodeGetContent(node));
+		this->refresh_rate=atoi(parser.getNodeContent(node).c_str());
 	else
 		printf("No refresh rate provided. Using default value: %d\n",this->refresh_rate);
 

@@ -76,10 +76,28 @@ bool XMLParser::haveAttribute(xmlNodePtr start, std::string attrName) const
 	return findAttribute(start->properties, attrName)!=NULL;
 }
 
-xmlChar* XMLParser::getAttributeContent(xmlNodePtr start, std::string  attrName) const
+std::string XMLParser::getAttributeContent(xmlNodePtr start, std::string  attrName) const
 {
 	xmlAttrPtr ptr=findAttribute(start->properties, attrName);
-	return ptr? xmlNodeGetContent((xmlNodePtr)ptr): NULL;
+	return ptr? getNodeContent((xmlNodePtr)ptr): "";
+}
+
+std::string XMLParser::getCurrentAttributeContent(xmlAttrPtr attr) const
+{
+	if(!attr)
+	{
+		fprintf(stderr,"Warning: Got Empty Attribute\n");
+		return "";
+	}
+	xmlChar* cur=xmlNodeGetContent((xmlNodePtr)attr);
+	if(!cur)
+	{
+		fprintf(stderr,"Warning: No content found\n");
+		return "";
+	}
+	std::string res=(char*)cur;
+	this->free(cur);
+	return res;
 }
 
 std::string XMLParser::getNodeContent(xmlNodePtr node) const
@@ -89,7 +107,7 @@ std::string XMLParser::getNodeContent(xmlNodePtr node) const
 		fprintf(stderr,"Warning: Got Empty Node\n");
 		return "";
 	}
-	xmlChar* cur=xmlNodeListGetString(doc, node->children, 1);
+	xmlChar* cur=xmlNodeGetContent(node);
 	if(!cur)
 	{
 		fprintf(stderr,"Warning: No content found\n");
@@ -114,9 +132,9 @@ void XMLParser::printTree(xmlNodePtr start, int depth) const
 {
 	for(int i=0;i<depth;i++)
 		printf("%d",(i+1)%10);
-	printf("\"%s\":\"%s\"\n",(start->name),xmlNodeGetContent(start));
-	xmlNodePtr i=getChild(start);
-	for(;i;i=getNext(i))
+	printf("\"%s\":\"%s\"\n",(start->name),this->getNodeContent(start).c_str());
+	xmlNodePtr i = this->getChild(start);
+	for(;i;i= this->getNext(i))
 	{
 		printTree(i,depth+1);
 	}
