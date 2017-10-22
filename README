@@ -47,6 +47,11 @@ place it into log). Currently supported parsers:
      Optional attribute: [HideUnsolved]=No/Yes
      Reads final standings of NEERC contest in HTML format and attempts to simulate it. It is unknown, when were wrong attempts made, so for problems that were accepted all wrong attempts were made simultaneously with accepted one. If problem wasn't solved, all attempts will be shown at start or won't be shown at all depending on [HideUnsolved]
 
+ > NYParser
+     Necessary attribute: [Path] or [URL]
+     Optional attribute: [HideUnsolved]=No/Yes
+     Reads final standings of New York Regional Contest in HTML format and attempts to simulate it. It is unknown, when were wrong attempts made, so for problems that were accepted all wrong attempts are assumed to be made simultaneously with accepted one. If problem wasn't solved, all attempts will be shown at the start or won't be shown at all depending on [HideUnsolved]
+
  > Timer
      _Provides time_
      Necessary attribute: [StartTime]
