@@ -1,6 +1,14 @@
+version 1.4
+- added generic parser EventBasedParser which is designed to unroll events that were stored during initialization phase
+- NEERCHtmlParser and NEERCXmlParser were rewritten and now are derived from EventBasedParser
+- NEERCXmlParser now can download XML from URL
+- added NYParser to parse New York Regional contests
+- new features were added to XMLParser
+- memory leaks due to improper handlind of xmlChar pointers were fixed
+
 version 1.31
 - now ProblemCount can be either a number or an id of last problem written in capital latin letters
-- added attribute IgnoreColumns to EjudgeParser. If you standings has additional columns, they can be excluded from consideration
+- added attribute IgnoreColumns to EjudgeParser. If your standings has additional columns, they can be excluded from consideration
 
 version 1.3
 - now standings are built by lua script specified by user

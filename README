@@ -1,7 +1,11 @@
-README for StandingsBuilder v1.3
+README for StandingsBuilder v1.4
 ===========
 
 This is program for building standings for ACM contests from different sources like other standings or logs of contests. The result of work is HTML file with merged standings
+
+To generate configuration script execute
+
+	autoreconf -i
 
 The program requires libxml2 and lua 5.2 in order to work properly. Also it is recommended to have libcurl installed, so program will be able to download files from internet. If you don't want this, you can run configuration script as follows:
 
