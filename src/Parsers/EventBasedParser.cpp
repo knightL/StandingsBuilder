@@ -25,7 +25,7 @@ EventBasedParser::Event::Event(int time, std::string team, int id, bool accepted
 
 bool EventBasedParser::Event::operator<(const Event& ev) const
 {
-	return time<ev.time;
+	return time>ev.time;
 }
 
 EventBasedParser::EventBasedParser(const XMLParser& config, xmlNodePtr start):Parser(config,start) {
