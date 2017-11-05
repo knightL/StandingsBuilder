@@ -118,7 +118,7 @@ NYParser::NYParser(const XMLParser& config, xmlNodePtr start):EventBasedParser(c
 							this->add_event(0, name, i, false, acnt);
 					}
 					else
-						this->add_event(tac, name, i, true, acnt-1);
+						this->add_event(tac*60, name, i, true, acnt-1);
 				}
 			}
 			free(buf);

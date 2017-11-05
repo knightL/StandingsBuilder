@@ -1,6 +1,6 @@
 stylesheet="http://neerc.ifmo.ru/standings-wt.css"
 title="ACM ICPC 2017-2018, NEERC"
-contest_length=5*60
+contest_length=5*60*60
 
 function problemName( id )
 	if 1<=id and id<=26 then
@@ -10,13 +10,21 @@ function problemName( id )
 	end
 end
 
-function timeToString( time )
-	if time<0 then
-		return "-:--"
-	else
-		local hh=math.floor(time/60)
+function timeToString( time, show_hh )
+	if time<0 and show_hh then
+		return "--:--"
+	elseif time<0 and not show_hh then
+		return "-:--:--"
+	elseif show_hh then
+		local ss=time%60
+		time=math.floor(time/60)
 		local mm=time%60
-		return string.format("%d:%02d",hh,mm)
+		local hh=math.floor(time/60)
+		return string.format("%d:%02d:%02d",hh,mm,ss)
+	else
+		local ss=time%60
+		local mm=math.floor(time/60)
+		return string.format("%d:%02d",mm,ss)
 	end
 end
 
@@ -29,13 +37,13 @@ function problemInfo( team, problem , firstac)
 	elseif not solved then
 		return "<b>-"..attempt.."</b>"
 	elseif solved and attempt==0 and firstac then
-		return "<i class=\"first-to-solve\">+<s><br>"..time.."</s></i>"
+		return "<i class=\"first-to-solve\">+<s><br>"..timeToString(time, false).."</s></i>"
 	elseif solved and attempt==0 then
-        return "<i>+<s><br>"..time.."</s></i>"
+        return "<i>+<s><br>"..timeToString(time, false).."</s></i>"
 	elseif firstac then
-		return "<i class=\"first-to-solve\">+"..attempt.."<s><br>"..time.."</s></i>"
+		return "<i class=\"first-to-solve\">+"..attempt.."<s><br>"..timeToString(time, false).."</s></i>"
 	else
-		return "<i>+"..attempt.."<s><br>"..time.."</s></i>"
+		return "<i>+"..attempt.."<s><br>"..timeToString(time, false).."</s></i>"
 	end
 end
 
@@ -60,6 +68,7 @@ function printStandings ( file, teams, time )
 	if time<0 then
 		time=contest_length
 	end
+	time=math.min(time, contest_length)
 	
 	n=#teams
 	p=contest.countproblems()
@@ -94,8 +103,6 @@ function printStandings ( file, teams, time )
 			end
 		end
 	end
-    
-    time=math.min(time, contest_length)
 
 	file:write("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><title>Standings</title><script type=\"text/javascript\">\n")
     file:write("function onShowTime() {\n")
@@ -111,7 +118,7 @@ function printStandings ( file, teams, time )
     file:write("<tr><td><center>\n")
     
     file:write("<a name=\""..title.."\"><h2>"..title.."</h2></a>\n")
-    file:write("<p>"..timeToString(time).." of "..timeToString(contest_length).."</p>\n")
+    file:write("<p>"..timeToString(time, true).." of "..timeToString(contest_length, true).."</p>\n")
     file:write("<p><input id=\"show-time\" type=\"checkbox\" name=\"show-times\" onclick=\"onShowTime()\" checked=\"true\">Show time</p>\n")
     
     file:write("<table class=\"standings\">\n")
@@ -133,11 +140,11 @@ function printStandings ( file, teams, time )
         end
         parity = 1-parity
         cstyle=contest.teamstyle(team)
-        file:write("<tr class=\"row"..pstyle..parity.."\"")
+        file:write("<tr class=\"row"..pstyle..parity)
         if #cstyle>0 then
-            file:write(" bgcolor=\""..cstyle.."\"")
+            file:write(" "..cstyle)
         end
-        file:write(">")
+        file:write("\">")
         file:write(cell("rankl", string.gmatch(contest.teamplace(team),"[0-9]+")()))
         file:write(cell("party", team))
         for j=1,p do
@@ -175,7 +182,7 @@ function printStandings ( file, teams, time )
 	file:write("<tr>"..cell(nil, "")..cell(nil,"First Accept"))
 	for i=1,p do
 		if firstac[i] ~= -1 then
-			file:write(cell(nil, firstac[i]..":00"))
+			file:write(cell(nil, timeToString(firstac[i])))
 		else
 			file:write(cell(nil, ""))
 		end
@@ -185,7 +192,7 @@ function printStandings ( file, teams, time )
 	file:write("<tr>"..cell(nil, "")..cell(nil,"Last Accept"))
 	for i=1,p do
 		if lastac[i] ~= -1 then
-			file:write(cell(nil, lastac[i]))
+			file:write(cell(nil, timeToString(lastac[i])))
 		else
 			file:write(cell(nil, ""))
 		end

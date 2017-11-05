@@ -10,6 +10,7 @@ function timeToString( time )
 	if time<0 then
 		return "-:--"
 	else
+		time=math.floor(time/60)
 		local hh=math.floor(time/60)
 		local mm=time%60
 		return string.format("%d:%02d",hh,mm)
@@ -44,7 +45,7 @@ function getPercent( num, den )
 end
 
 function printStandings ( file, teams, time )
-
+	
 	n=#teams
 	p=contest.countproblems()
 

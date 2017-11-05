@@ -1,3 +1,8 @@
+version 1.41
+- all times are stored in seconds
+- updated all parsers and output scripts to handle time in seconds properly
+- outputNEERCStyle.lua now instead of modifying bgcolor sets class of the row
+
 version 1.4
 - added generic parser EventBasedParser which is designed to unroll events that were stored during initialization phase
 - NEERCHtmlParser and NEERCXmlParser were rewritten and now are derived from EventBasedParser

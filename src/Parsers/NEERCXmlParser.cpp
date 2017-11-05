@@ -52,7 +52,7 @@ NEERCXmlParser::NEERCXmlParser(const XMLParser& config, xmlNodePtr start):
 					for(; runs; runs= xml.getNext(runs))
 					{
 						int accepted= xml.getAttributeContent(runs, "accepted")=="yes";
-						int time=atoi(xml.getAttributeContent(runs, "time").c_str())/1000/60;
+						int time=atoi(xml.getAttributeContent(runs, "time").c_str())/1000;
 
 						this->add_event(time, name, id, accepted, accepted? 0:1 );
 					}

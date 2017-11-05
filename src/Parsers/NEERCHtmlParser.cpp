@@ -9,6 +9,7 @@
 #include "libxml/HTMLparser.h"
 #include "NEERCHtmlParser.h"
 #include <cstring>
+#include <cstdio>
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
@@ -80,10 +81,12 @@ NEERCHtmlParser::NEERCHtmlParser(const XMLParser& config, xmlNodePtr start):
 					}
 					else if(t1[0]=='+')
 					{
-						//get content of div tag
+						//get content of s tag
 						string t2=xml.getNodeContent(xml.getChild(xml.getChild(cur)));
 						t1=t1.substr(0, t1.size() - t2.size() );
-						this->add_event( atoi(t2.c_str()), name, i, true, (t1.size()==1)?0:atoi(t1.c_str()) );
+						int m=-1,s=-1;
+						sscanf(t2.c_str(), "%d:%d",&m,&s);
+						this->add_event( m*60+s, name, i, true, (t1.size()==1)?0:atoi(t1.c_str()) );
 					}
 				}
 			}

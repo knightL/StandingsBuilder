@@ -73,7 +73,7 @@ void Timer::update()
 {
 	time_t nxttime=time(0);
 	
-	curtime=(nxttime-starttime)/60;
+	curtime=nxttime-starttime;
 	// if nxttime < starttime then contest hasn't started
 	if(curtime<0)
 		curtime=0;

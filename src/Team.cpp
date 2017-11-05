@@ -28,7 +28,7 @@ void Team::make_attempt(int t, int id, bool accepted)
 		{
 			this->solved[id] = true;
 			this->time[id]=t;
-			this->result += Result(1,t + this->attempts[id]*20);
+			this->result += Result(1,t/60 + this->attempts[id]*20);
 		}
 		else
 			this->attempts[id]++;
@@ -43,7 +43,7 @@ void Team::make_from_description(std::vector<int> attempts, std::vector<bool> so
 	this->result = Result(0, 0);
 	for(int i=0 ; i<(int)attempts.size() ; i++)
 		if(this->solved[i])
-			this->result+=Result(1, time[i] + this->attempts[i]*20 );
+			this->result+=Result(1, time[i]/60 + this->attempts[i]*20 );
 }
 
 void Team::make_form_timeless_description(std::vector<int> attempts, std::vector<bool> solved, Result res)

@@ -78,7 +78,7 @@ void EjudgeParser::update()
 				}
 			int h,m,s;
 			if(sscanf(&description.c_str()[i],"%d:%d:%d",&h,&m,&s)==3)
-				curtime=m+60*h;
+				curtime=(m+60*h)*60+s;
 			else
 				printf("Failed to read time");
 		}
@@ -175,8 +175,10 @@ void EjudgeParser::updateContest(Contest* contest, int)
 							fprintf(stderr, "EjudgeParser: Bad formated ejudge table enocuntered: Failed to parse time");
 							return;
 						}
+						time.back()[i]=(60*h+m)*60;
 					}
-					time.back()[i]=60*h+m;
+					else
+						time.back()[i]=-1;
 					break;
 				}
 				else if(buf[j]=='-')
