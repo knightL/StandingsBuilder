@@ -213,7 +213,7 @@ void _Unroller::run()
 			parsers[i]->updateContest(contest,parser_provides_time?curtime:MAXIMAL_TIME);
 
 		// print standings to output file
-		contest->print_standings(this->output_file_name, parser_provides_time?curtime:0);
+		contest->print_standings(this->output_file_name, parser_provides_time?curtime:-1);
 
 		// if delay is zero, end cycle
 		if(refresh_rate==0)

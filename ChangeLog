@@ -5,6 +5,8 @@ version 1.4
 - added NYParser to parse New York Regional contests
 - new features were added to XMLParser
 - memory leaks due to improper handlind of xmlChar pointers were fixed
+- added outputNEERCStyle.lua that outputs NEERC-like table
+- if no parser provide time, then -1 is passed as time to output script
 
 version 1.31
 - now ProblemCount can be either a number or an id of last problem written in capital latin letters
