@@ -34,11 +34,14 @@ public:
 	xmlNode* walkPath(xmlNodePtr start, const std::vector<std::string>& path) const;
 	xmlAttr* findAttribute(xmlAttrPtr start, std::string attrName ) const;
 	bool haveAttribute(xmlNodePtr start, std::string) const;
+	xmlAttrPtr getAttributeList(xmlNodePtr node) const;
+	xmlAttrPtr getNextAttribute(xmlAttrPtr node) const;
 	std::string getAttributeContent(xmlNodePtr start, std::string) const;
 	std::string getCurrentAttributeContent(xmlAttrPtr node) const;
 	std::string getNodeContent(xmlNodePtr node) const;
 	void printTree(xmlNodePtr start, int depth=0) const;
 	void free(xmlChar* data) const;
+
 };
 
 #endif /* HTMLPARSER_H_ */

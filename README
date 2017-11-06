@@ -1,4 +1,4 @@
-README for StandingsBuilder v1.4
+README for StandingsBuilder v1.42
 ===========
 
 This is program for building standings for ACM contests from different sources like other standings or logs of contests. The result of work is HTML file with merged standings
@@ -89,7 +89,7 @@ StandingsBuilder uses Lua scripts to build resulting standings. Once application
   Second argument is table of team names, ordered by their position in standings. 
   Third argument is current elapsed time since contest start.
 
-You shouldn't close file, it will be closed automaticly
+You shouldn't close file, it will be closed automatically.
 
 To get information about teams, StandingsBuilder provides library "contest" with following content (T=team, pID=problemID):
 
@@ -101,6 +101,8 @@ To get information about teams, StandingsBuilder provides library "contest" with
   teamproblemattempts(T,pID) - returns number of unsuccessfull attempts by team
   teamsolved(T,pID)          - returns whether problem pID was solved by team         
   teamproblemtime(T,pID)     - returns time, when problem was solved by team. If time is unknown or problem is unsolved, -1 is returned
+
+If the script has "init" function, it will be called at the start. "init" function is expected to have exactly one argument: all properties of OutputScript passed in a table.
 
 Example of Lua script, which will produce standings list:
 
@@ -114,4 +116,3 @@ function printStandings ( file, teams, time )
 		contest.teamproblemssolved(team).."/"..p.." "..contest.teampenalty(team).."\n")
 	end
 end
-

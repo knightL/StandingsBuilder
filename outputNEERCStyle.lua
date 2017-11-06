@@ -1,6 +1,18 @@
-stylesheet="http://neerc.ifmo.ru/standings-wt.css"
-title="ACM ICPC 2017-2018, NEERC"
+stylesheet=""
+title="Standings"
 contest_length=5*60*60
+
+function init( init_table )
+	if init_table["Stylesheet"]~=nil then
+		stylesheet=init_table["Stylesheet"]
+	end
+	if init_table["Title"]~=nil then
+		title=init_table["Title"]
+	end
+	if init_table["ContestLength"]~=nil then
+		contest_length=tonumber(init_table["ContestLength"])
+	end
+end
 
 function problemName( id )
 	if 1<=id and id<=26 then
@@ -39,7 +51,7 @@ function problemInfo( team, problem , firstac)
 	elseif solved and attempt==0 and firstac then
 		return "<i class=\"first-to-solve\">+<s><br>"..timeToString(time, false).."</s></i>"
 	elseif solved and attempt==0 then
-        return "<i>+<s><br>"..timeToString(time, false).."</s></i>"
+		return "<i>+<s><br>"..timeToString(time, false).."</s></i>"
 	elseif firstac then
 		return "<i class=\"first-to-solve\">+"..attempt.."<s><br>"..timeToString(time, false).."</s></i>"
 	else
@@ -48,11 +60,11 @@ function problemInfo( team, problem , firstac)
 end
 
 function cell(class, str)
-    if class == nil then
-        return "<td>"..str.."</td>"
-    else
-        return "<td class=\""..class.."\">"..str.."</td>"
-    end
+	if class == nil then
+		return "<td>"..str.."</td>"
+	else
+		return "<td class=\""..class.."\">"..str.."</td>"
+	end
 end
 
 function getPercent( num, den )
@@ -75,22 +87,22 @@ function printStandings ( file, teams, time )
 
 	total={}
 	success={}
-    rejected={}
-    firstac={}
-    lastac={}
+	rejected={}
+	firstac={}
+	lastac={}
 
 	for i=1,p do 
 		total[i]=0
 		success[i]=0
-        rejected[i]=0
-        firstac[i]=-1
-        lastac[i]=-1
+		rejected[i]=0
+		firstac[i]=-1
+		lastac[i]=-1
 	end
 	
 	for i=1,p do
 		for j,name in ipairs(teams) do
 			total[i]=total[i]+contest.teamproblemattempts(name, i)
-            rejected[i]=rejected[i]+contest.teamproblemattempts(name,i)
+			rejected[i]=rejected[i]+contest.teamproblemattempts(name,i)
 			if contest.teamsolved(name, i) then
 				total[i]=total[i]+1
 				success[i]=success[i]+1
@@ -105,63 +117,63 @@ function printStandings ( file, teams, time )
 	end
 
 	file:write("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/><title>Standings</title><script type=\"text/javascript\">\n")
-    file:write("function onShowTime() {\n")
-    file:write("    var showTime = document.getElementById(\"show-time\");\n")
-    file:write("    var display = showTime.checked ? \"\" : \"none\";\n")
-    file:write("    var times = document.getElementsByTagName('s');\n")
-    file:write("    for (var i = 0; i < times.length; i++){\n")
-    file:write("        times[i].style.display = display;\n")
-    file:write("    }\n")
-    file:write("}\n")
-    file:write("</script><link rel=\"stylesheet\" href=\"".. stylesheet .."\"></head><body>\n"); 
-    file:write("<table class=\"wrapper\">\n")
-    file:write("<tr><td><center>\n")
-    
-    file:write("<a name=\""..title.."\"><h2>"..title.."</h2></a>\n")
-    file:write("<p>"..timeToString(time, true).." of "..timeToString(contest_length, true).."</p>\n")
-    file:write("<p><input id=\"show-time\" type=\"checkbox\" name=\"show-times\" onclick=\"onShowTime()\" checked=\"true\">Show time</p>\n")
-    
-    file:write("<table class=\"standings\">\n")
-    file:write("<thead><tr><th class=\"rankl\">Rank</th><th class=\"party\">Team</th>")
-    for i=1,p do
-        file:write("<th class=\"problem\">"..problemName(i).."</th>")
-    end
-    file:write("<th class=\"solved\">=</th><th class=\"penalty\">Time</th></thead>\n")
-    file:write("<tbody>\n")
-    
-    prevsolved=p+1
-    pstyle=1
-    parity=0
-    
-    for i,team in ipairs(teams) do
-        if contest.teamproblemssolved(team) ~= prevsolved then
-            pstyle = 1 - pstyle
-            prevsolved=contest.teamproblemssolved(team)
-        end
-        parity = 1-parity
-        cstyle=contest.teamstyle(team)
-        file:write("<tr class=\"row"..pstyle..parity)
-        if #cstyle>0 then
-            file:write(" "..cstyle)
-        end
-        file:write("\">")
-        file:write(cell("rankl", string.gmatch(contest.teamplace(team),"[0-9]+")()))
-        file:write(cell("party", team))
-        for j=1,p do
+	file:write("function onShowTime() {\n")
+	file:write("	var showTime = document.getElementById(\"show-time\");\n")
+	file:write("	var display = showTime.checked ? \"\" : \"none\";\n")
+	file:write("	var times = document.getElementsByTagName('s');\n")
+	file:write("	for (var i = 0; i < times.length; i++){\n")
+	file:write("		times[i].style.display = display;\n")
+	file:write("	}\n")
+	file:write("}\n")
+	file:write("</script><link rel=\"stylesheet\" href=\"".. stylesheet .."\"></head><body>\n"); 
+	file:write("<table class=\"wrapper\">\n")
+	file:write("<tr><td><center>\n")
+	
+	file:write("<a name=\""..title.."\"><h2>"..title.."</h2></a>\n")
+	file:write("<p>"..timeToString(time, true).." of "..timeToString(contest_length, true).."</p>\n")
+	file:write("<p><input id=\"show-time\" type=\"checkbox\" name=\"show-times\" onclick=\"onShowTime()\" checked=\"true\">Show time</p>\n")
+	
+	file:write("<table class=\"standings\">\n")
+	file:write("<thead><tr><th class=\"rankl\">Rank</th><th class=\"party\">Team</th>")
+	for i=1,p do
+		file:write("<th class=\"problem\">"..problemName(i).."</th>")
+	end
+	file:write("<th class=\"solved\">=</th><th class=\"penalty\">Time</th></thead>\n")
+	file:write("<tbody>\n")
+	
+	prevsolved=p+1
+	pstyle=1
+	parity=0
+	
+	for i,team in ipairs(teams) do
+		if contest.teamproblemssolved(team) ~= prevsolved then
+			pstyle = 1 - pstyle
+			prevsolved=contest.teamproblemssolved(team)
+		end
+		parity = 1-parity
+		cstyle=contest.teamstyle(team)
+		file:write("<tr class=\"row"..pstyle..parity)
+		if #cstyle>0 then
+			file:write(" "..cstyle)
+		end
+		file:write("\">")
+		file:write(cell("rankl", string.gmatch(contest.teamplace(team),"[0-9]+")()))
+		file:write(cell("party", team))
+		for j=1,p do
 			if contest.teamsolved(team,j) and contest.teamproblemtime(team,j) == firstac[j] then
 				file:write(cell(nil,problemInfo(team, j, true)))
 			else
 				file:write(cell(nil,problemInfo(team, j, false)))
 			end
-        end
-        file:write(cell(nil, contest.teamproblemssolved(team)))
-        file:write(cell("penalty", contest.teampenalty(team)))
-        file:write("</tr>\n")
-    end
-    file:write("</tbody>\n")
+		end
+		file:write(cell(nil, contest.teamproblemssolved(team)))
+		file:write(cell("penalty", contest.teampenalty(team)))
+		file:write("</tr>\n")
+	end
+	file:write("</tbody>\n")
 	
 	file:write("<tfoot>\n")
-    file:write("<tr>"..cell(nil, "")..cell(nil,"Total runs"))
+	file:write("<tr>"..cell(nil, "")..cell(nil,"Total runs"))
 	for i=1,p do
 		file:write(cell(nil, total[i]))
 	end
@@ -199,9 +211,9 @@ function printStandings ( file, teams, time )
 	end
 	file:write("<tr>\n")
 	
-    file:write("</tfoot></table>\n")
-    
-    file:write("</center></tr></td>\n")
-    file:write("</table></body></html>\n");
+	file:write("</tfoot></table>\n")
+	
+	file:write("</center></tr></td>\n")
+	file:write("</table></body></html>\n");
 
 end

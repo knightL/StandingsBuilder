@@ -13,7 +13,7 @@
 #include <sstream>
 using namespace std;
 
-Contest::Contest(int problem_cnt, std::string script_file_name) {
+Contest::Contest(int problem_cnt, std::string script_file_name, const XMLParser& config) {
 	this->problem_count=problem_cnt;
 
 	//initalize Lua
@@ -41,9 +41,27 @@ Contest::Contest(int problem_cnt, std::string script_file_name) {
 		printf("No printStandings function in LUA script\n");
 		exit(2);
 	}
+	
 	//clear stack
 	lua_pop( lvm, 1 );
 	
+	//check if init function is present and call it
+	lua_getglobal( lvm, "init" );
+
+	if ( lua_isfunction( lvm, -1) )
+	{
+		lua_newtable( lvm );
+		xmlNodePtr node = config.findNode(config.getChild(config.getRoot()),"OutputScript");
+		for(xmlAttrPtr attr = config.getAttributeList(node); attr != NULL; attr=config.getNextAttribute(attr))
+		{
+			lua_pushstring( lvm, (char*)attr->name);
+			lua_pushstring( lvm, config.getCurrentAttributeContent(attr).c_str());
+			lua_settable( lvm, -3 );
+		}
+		lua_call( lvm, 1, 0);
+	}
+	else
+		lua_pop( lvm, 1 );
 }
 
 Contest::~Contest()

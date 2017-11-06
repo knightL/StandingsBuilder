@@ -158,7 +158,7 @@ void _Unroller::init(int argc, char** argv)
 			printf("%s\n",name.c_str());
 	}
 
-	contest=new Contest(problem_count,script_file_name);
+	contest=new Contest(problem_count,script_file_name, parser);
 }
 
 _Unroller::~_Unroller() {

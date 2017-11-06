@@ -12,6 +12,7 @@
 #include "Team.h"
 #include <lua.hpp>
 #include "luacontestlib.h"
+#include "XMLParser.h"
 
 typedef std::set<std::pair<Result, pTeam> > Standings;
 
@@ -22,7 +23,7 @@ class Contest {
 	std::map<std::string, std::string> team_place;
 	lua_State *lvm;
 public:
-	Contest(int problem_cnt, std::string script_file_name);
+	Contest(int problem_cnt, std::string script_file_name, const XMLParser& config);
 	~Contest();
 
 	/**

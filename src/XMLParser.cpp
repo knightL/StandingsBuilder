@@ -64,6 +64,16 @@ xmlNode* XMLParser::walkPath(xmlNodePtr start, const std::vector<std::string>& p
 	return cur;
 }
 
+xmlAttrPtr XMLParser::getAttributeList(xmlNodePtr node) const
+{
+	return node->properties;
+}
+
+xmlAttrPtr XMLParser::getNextAttribute(xmlAttrPtr node) const
+{
+	return node->next;
+}
+
 xmlAttrPtr XMLParser::findAttribute(xmlAttrPtr start, std::string AttrName) const
 {
 	while(start && strcmp(AttrName.c_str(), (char*) start->name))
