@@ -1,3 +1,12 @@
+--[[Output standings in NEERC Style
+
+Optional initialization parameters:
+- Stylesheet - address of css stylesheet to be used in the document
+- Title - contest title to be printed at the top
+- ContestLength - duration of contest in seconds
+ 
+]]
+
 stylesheet=""
 title="Standings"
 contest_length=5*60*60

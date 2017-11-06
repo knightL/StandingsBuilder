@@ -1,3 +1,6 @@
+version 1.42
+- improved lua script interaction: init function, if present, is now called at the start. As a single argument a table with all properties is passed
+
 version 1.41
 - all times are stored in seconds
 - updated all parsers and output scripts to handle time in seconds properly
